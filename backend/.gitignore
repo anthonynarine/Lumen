@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+*.log
+
+# Virtualenv
+lumen_venv/
+
+# Django stuff
+/static/
+media/
+db.sqlite3
