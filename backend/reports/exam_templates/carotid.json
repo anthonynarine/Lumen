@@ -1,0 +1,644 @@
+{
+  "id": "carotid",
+  "version": "1.0.0",
+  "site": "mount_sinai_gp1c",
+  "title": "Bilateral Carotid Duplex Protocol",
+  "segments": [
+    {
+      "id": "origin_subclavian_right",
+      "label": "Origin SUBCLAVIAN (Right)",
+      "side": "right",
+      "vessel": "SUBCLAVIAN",
+      "position": "origin",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": false,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "prox_subclavian_right",
+      "label": "Prox SUBCLAVIAN (Right)",
+      "side": "right",
+      "vessel": "SUBCLAVIAN",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": false,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "dist_subclavian_right",
+      "label": "Dist SUBCLAVIAN (Right)",
+      "side": "right",
+      "vessel": "SUBCLAVIAN",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": false,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "prox_cca_right",
+      "label": "Prox CCA (Right)",
+      "side": "right",
+      "vessel": "CCA",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "mid_cca_right",
+      "label": "Mid CCA (Right)",
+      "side": "right",
+      "vessel": "CCA",
+      "position": "mid",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "dist_cca_right",
+      "label": "Dist CCA (Right)",
+      "side": "right",
+      "vessel": "CCA",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "prox_ica_right",
+      "label": "Prox ICA (Right)",
+      "side": "right",
+      "vessel": "ICA",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "mid_ica_right",
+      "label": "Mid ICA (Right)",
+      "side": "right",
+      "vessel": "ICA",
+      "position": "mid",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "dist_ica_right",
+      "label": "Dist ICA (Right)",
+      "side": "right",
+      "vessel": "ICA",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "origin_vertebral_right",
+      "label": "Origin VERTEBRAL (Right)",
+      "side": "right",
+      "vessel": "VERTEBRAL",
+      "position": "origin",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "prox_vertebral_right",
+      "label": "Prox VERTEBRAL (Right)",
+      "side": "right",
+      "vessel": "VERTEBRAL",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "mid_vertebral_right",
+      "label": "Mid VERTEBRAL (Right)",
+      "side": "right",
+      "vessel": "VERTEBRAL",
+      "position": "mid",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "dist_vertebral_right",
+      "label": "Dist VERTEBRAL (Right)",
+      "side": "right",
+      "vessel": "VERTEBRAL",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "bifurcation_right",
+      "label": "Bifurcation (Right)",
+      "side": "right",
+      "vessel": "BIFURCATION",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true
+    },
+    {
+      "id": "eca_right",
+      "label": "Eca (Right)",
+      "side": "right",
+      "vessel": "ECA",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true
+    },
+    {
+      "id": "origin_subclavian_left",
+      "label": "Origin SUBCLAVIAN (Left)",
+      "side": "left",
+      "vessel": "SUBCLAVIAN",
+      "position": "origin",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": false,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "prox_subclavian_left",
+      "label": "Prox SUBCLAVIAN (Left)",
+      "side": "left",
+      "vessel": "SUBCLAVIAN",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": false,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "dist_subclavian_left",
+      "label": "Dist SUBCLAVIAN (Left)",
+      "side": "left",
+      "vessel": "SUBCLAVIAN",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": false,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "prox_cca_left",
+      "label": "Prox CCA (Left)",
+      "side": "left",
+      "vessel": "CCA",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "mid_cca_left",
+      "label": "Mid CCA (Left)",
+      "side": "left",
+      "vessel": "CCA",
+      "position": "mid",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "dist_cca_left",
+      "label": "Dist CCA (Left)",
+      "side": "left",
+      "vessel": "CCA",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "prox_ica_left",
+      "label": "Prox ICA (Left)",
+      "side": "left",
+      "vessel": "ICA",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "mid_ica_left",
+      "label": "Mid ICA (Left)",
+      "side": "left",
+      "vessel": "ICA",
+      "position": "mid",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "dist_ica_left",
+      "label": "Dist ICA (Left)",
+      "side": "left",
+      "vessel": "ICA",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": false
+    },
+    {
+      "id": "origin_vertebral_left",
+      "label": "Origin VERTEBRAL (Left)",
+      "side": "left",
+      "vessel": "VERTEBRAL",
+      "position": "origin",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "prox_vertebral_left",
+      "label": "Prox VERTEBRAL (Left)",
+      "side": "left",
+      "vessel": "VERTEBRAL",
+      "position": "prox",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "mid_vertebral_left",
+      "label": "Mid VERTEBRAL (Left)",
+      "side": "left",
+      "vessel": "VERTEBRAL",
+      "position": "mid",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "dist_vertebral_left",
+      "label": "Dist VERTEBRAL (Left)",
+      "side": "left",
+      "vessel": "VERTEBRAL",
+      "position": "dist",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true,
+      "direction": true
+    },
+    {
+      "id": "bifurcation_left",
+      "label": "Bifurcation (Left)",
+      "side": "left",
+      "vessel": "BIFURCATION",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true
+    },
+    {
+      "id": "eca_left",
+      "label": "Eca (Left)",
+      "side": "left",
+      "vessel": "ECA",
+      "measurements": [
+        {
+          "name": "psv",
+          "unit": "cm/s"
+        },
+        {
+          "name": "edv",
+          "unit": "cm/s"
+        }
+      ],
+      "plaque": true,
+      "waveform": true
+    }
+  ],
+  "display": {
+    "groups": [
+      {
+        "title": "Right Side",
+        "segments": [
+          "origin_subclavian_right",
+          "prox_subclavian_right",
+          "dist_subclavian_right",
+          "prox_cca_right",
+          "mid_cca_right",
+          "dist_cca_right",
+          "prox_ica_right",
+          "mid_ica_right",
+          "dist_ica_right",
+          "origin_vertebral_right",
+          "prox_vertebral_right",
+          "mid_vertebral_right",
+          "dist_vertebral_right",
+          "bifurcation_right",
+          "eca_right"
+        ]
+      },
+      {
+        "title": "Left Side",
+        "segments": [
+          "origin_subclavian_left",
+          "prox_subclavian_left",
+          "dist_subclavian_left",
+          "prox_cca_left",
+          "mid_cca_left",
+          "dist_cca_left",
+          "prox_ica_left",
+          "mid_ica_left",
+          "dist_ica_left",
+          "origin_vertebral_left",
+          "prox_vertebral_left",
+          "mid_vertebral_left",
+          "dist_vertebral_left",
+          "bifurcation_left",
+          "eca_left"
+        ]
+      }
+    ]
+  }
+}

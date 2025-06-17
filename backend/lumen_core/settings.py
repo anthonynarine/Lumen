@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     
     # created apps
     "reports", 
+    "report_templates",
 ]
 
 MIDDLEWARE = [
