@@ -35,6 +35,9 @@ INSTALLED_APPS = [
     "corsheaders",
     'channels',
     "auth_integration", # I BUILT THAT 
+    
+    # created apps
+    "reports", 
 ]
 
 MIDDLEWARE = [
