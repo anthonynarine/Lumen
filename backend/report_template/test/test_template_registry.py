@@ -1,6 +1,8 @@
 import pytest
 from report_template.registry.template_registry import get_template
 
+# to run pytest report_template (runs all test in app)
+
 # ✅ Test: Ensure the carotid template loads successfully and contains expected fields
 def test_valid_carotid_template_loads_successfully():
     """
@@ -8,7 +10,7 @@ def test_valid_carotid_template_loads_successfully():
     - The template ID is 'carotid'
     - The template contains a 'segments' key
     """
-    tpl = get_template("carotid", site="mount_sinai_gp1c", version="1.0.0")
+    tpl = get_template("carotid", site="mount_sinai_hospital", version="1.0.0")
     assert tpl["id"] == "carotid"
     assert "segments" in tpl
 
@@ -40,4 +42,6 @@ def test_raises_value_error_for_wrong_version():
     Should raise ValueError due to version mismatch.
     """
     with pytest.raises(ValueError, match="Version mismatch"):
-        get_template("carotid", site="mount_sinai_gp1c", version="999.0.0")
+        get_template("carotid", site="mount_sinai_hospital", version="999.0.0")
+
+        

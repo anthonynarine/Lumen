@@ -1,7 +1,7 @@
 from report_template.registry.template_registry import get_template
 from reports.models.exam import Exam
 from reports.models.segment import Segment
-from reports.models.measurementrs import Measurement
+from reports.models.measurements import Measurement
 
 
 def generate_placeholder_name(gender: str = "unspecified") -> str:
