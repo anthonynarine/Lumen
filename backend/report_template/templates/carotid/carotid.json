@@ -1,7 +1,7 @@
 {
   "id": "carotid",
   "version": "1.0.0",
-  "site": "mount_sinai_gp1c",
+  "site": "mount_sinai_hospital",
   "title": "Bilateral Carotid Duplex Protocol",
   "segments": [
     {
