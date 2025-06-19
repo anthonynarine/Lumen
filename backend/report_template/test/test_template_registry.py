@@ -1,7 +1,7 @@
 import pytest
 from report_template.registry.template_registry import get_template
 
-# to run pytest report_template (runs all test in app)
+# to run, from project root - pytest report_template (runs all test in app)
 
 # ✅ Test: Ensure the carotid template loads successfully and contains expected fields
 def test_valid_carotid_template_loads_successfully():

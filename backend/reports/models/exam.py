@@ -40,6 +40,16 @@ class Exam(models.Model):
         ("tech_signed", "Signed by Technologist"),
         ("finalized", "Finalized by Physician"),
     ]
+    
+
+    EXAM_SOURCE_CHOICES = [
+        ("manual", "Manual Entry"),
+        ("epic", "HL7/EPIC"),
+        ("dicom", "DICOM SR"),
+        ("agent", "AI Agent"),
+        ("import", "Batch Import"),
+    ]
+
 
     # 🔹 Patient Metadata (from scheduling system or DICOM worklist)
     patient_name = models.CharField(max_length=255)
@@ -102,6 +112,12 @@ class Exam(models.Model):
         default="draft",
         blank=True,
         help_text="Workflow status: draft → tech_signed → finalized."
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=EXAM_SOURCE_CHOICES,
+        default="manual",
+        help_text="Origin of exam data (manual, EPIC, DICOM, etc.)"
     )
 
     # 🔹 Audit Trail
