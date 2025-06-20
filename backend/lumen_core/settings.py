@@ -133,6 +133,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 CHANNEL_LAYERS = {
@@ -142,4 +143,15 @@ CHANNEL_LAYERS = {
             "hosts": [("127.0.0.1", 6379)],
         },
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Lumen API',
+    'DESCRIPTION': 'Modern vascular ultrasound reporting API — CPT/ICD logic, claims, HL7 integration',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX_TRIM': True,
+    # 'SERVE_PERMISSIONS': [], # public access 
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser'],  # Optional: restrict /docs access
 }

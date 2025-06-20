@@ -12,6 +12,7 @@ class Exam(models.Model):
         - Exam scope/extent (bilateral, limited, etc.)
         - CPT code (auto-filled based on scope/extent)
         - Clinical context (indication, operative history, technique)
+        - Gender, source, and AI-related metadata
 
     An Exam is the parent object for all associated Segment and Measurement data.
     It progresses through a clear workflow:
@@ -40,7 +41,6 @@ class Exam(models.Model):
         ("tech_signed", "Signed by Technologist"),
         ("finalized", "Finalized by Physician"),
     ]
-    
 
     EXAM_SOURCE_CHOICES = [
         ("manual", "Manual Entry"),
@@ -50,9 +50,22 @@ class Exam(models.Model):
         ("import", "Batch Import"),
     ]
 
+    GENDER_CHOICES = [
+        ("male", "Male"),
+        ("female", "Female"),
+        ("nonbinary", "Nonbinary"),
+        ("unknown", "Unknown"),
+        ("other", "Other / Prefer to self-describe"),
+    ]
 
-    # 🔹 Patient Metadata (from scheduling system or DICOM worklist)
+    # 🔹 Patient Metadata
     patient_name = models.CharField(max_length=255)
+    gender = models.CharField(
+        max_length=16,
+        choices=GENDER_CHOICES,
+        default="unknown",
+        help_text="Patient gender (used in phrasing and context)."
+    )
     mrn = models.CharField(max_length=64)
     dob = models.DateField(null=True, blank=True)
     accession = models.CharField(max_length=64, blank=True)

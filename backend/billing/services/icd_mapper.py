@@ -16,7 +16,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-ICD_MAP = {
+ICD10_MAP = {
     "carotid": [
         {"code": "I65.23", "label": "Occlusion and stenosis of bilateral carotid arteries"},
         {"code": "I73.9",  "label": "Peripheral vascular disease, unspecified"},
@@ -66,7 +66,7 @@ def get_icd_codes(exam_type: str, strict: bool = False):
     Returns:
         list[dict]: List of {"code": ..., "label": ...} pairs
     """
-    codes = ICD_MAP.get(exam_type)
+    codes = ICD10_MAP.get(exam_type)
 
     if not codes:
         logger.warning(f"No ICD-10 codes found for exam_type='{exam_type}'")

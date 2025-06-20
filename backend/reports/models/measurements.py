@@ -77,6 +77,8 @@ class Measurement(models.Model):
         blank=True,
         help_text="Optional derived field showing interpreted stenosis severity (e.g. '60–79%')."
     )
+    additional_data = models.JSONField(default=dict, blank=True, help_text="Custom or extra measurements not modeled explicitly.")
+
 
     def __str__(self):
         return f"{self.segment.name} – PSV: {self.psv or 'N/A'}"
