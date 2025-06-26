@@ -1,0 +1,32 @@
+{
+  "stenosis_thresholds": {
+    "0_19": {
+      "psv_max": 104
+    },
+    "20_39": {
+      "psv_min": 105,
+      "psv_max": 109
+    },
+    "40_59": {
+      "psv_min": 110,
+      "psv_max": 179
+    },
+    "60_79": {
+      "psv_min": 180,
+      "psv_max": 240,
+      "edv_max": 134
+    },
+    "80_99": {
+      "psv_min": 241,
+      "edv_min": 135
+    },
+    "upgrade_if_ratio_gt": 4
+  },
+  "vertebral_rules": {
+    "steal_direction": "retrograde",
+    "pre_steal_waveforms": [
+      "bidirectional",
+      "early_systolic_deceleration"
+    ]
+  }
+}
