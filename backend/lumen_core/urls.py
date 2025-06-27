@@ -3,12 +3,14 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
+    # 🛠️ Admin and billing
     path("admin/", admin.site.urls),
     path("billing/", include("billing.urls")),
 
-    # 🧾 Raw OpenAPI JSON schema
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    # 📊 Carotid API endpoints (modular)
+    path("api/", include("reports.urls.carotid_urls")),
 
-    # 🖥️ Swagger UI (secured, interactive)
+    # 🧾 OpenAPI schema + Swagger
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]

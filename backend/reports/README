@@ -69,8 +69,6 @@ Each segment dict holds calculated fields
 
 
 
-
-
 1. Template Layer
 ┌───────────────────────────────┐
 │ exam_templates/carotid.json   │ ◀─ Defines segment structure + field names
@@ -148,5 +146,4 @@ Each segment dict holds calculated fields
 │  ├─ .export_json()                           │
 │  └─ .log_all_segments()                      │
 │                                              │
-│ ⏩ Ready for ReportConclusion and PDF         │
 └──────────────────────────────────────────────┘
