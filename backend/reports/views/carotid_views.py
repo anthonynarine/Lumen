@@ -19,7 +19,7 @@ from django.shortcuts import get_object_or_404
 
 from report_template.registry.template_registry import get_template
 from reports.models import Exam
-from reports.serializers import ExamSerializer
+from reports.serializers.carotid_serializer import CarotidExamSerializer
 from reports.calculators.carotid_calculator import run_carotid_calculator
 from reports.services.conclusion_generator import generate_conclusion
 from reports.types.segments.carotid_segments import build_segment_dict
@@ -76,13 +76,13 @@ def create_carotid_exam(request):
     logger.debug(f"Submitted data: {data}")
 
     try:
-        serializer = ExamSerializer(data=data)
+        serializer = CarotidExamSerializer(data=data)
         if serializer.is_valid():
             exam = serializer.save()
             logger.info(f"Carotid exam created: ID={exam.id}, patient={exam.patient_name}")
             return Response({
                 "message": "Carotid exam created successfully.",
-                "exam": ExamSerializer(exam).data
+                "exam": CarotidExamSerializer(exam).data
             }, status=status.HTTP_201_CREATED)
 
         logger.warning(f"Validation failed for carotid exam creation: {serializer.errors}")
@@ -168,7 +168,7 @@ def calculate_carotid_exam(request, exam_id):
         run_carotid_calculator(exam)
         exam.refresh_from_db()
         logger.info(f"Calculation complete for exam ID: {exam.id}")
-        return Response(ExamSerializer(exam).data)
+        return Response(CarotidExamSerializer(exam).data)
 
     except Exception as e:
         logger.exception(f"Unhandled exception while calculating carotid exam ID {exam_id}")

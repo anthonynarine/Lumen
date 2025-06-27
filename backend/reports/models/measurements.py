@@ -77,7 +77,15 @@ class Measurement(models.Model):
         blank=True,
         help_text="Optional derived field showing interpreted stenosis severity (e.g. '60–79%')."
     )
-    additional_data = models.JSONField(default=dict, blank=True, help_text="Custom or extra measurements not modeled explicitly.")
+    additional_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Custom or extra measurements not modeled explicitly.")
+    
+    calculated_fields = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Derived metrics like ICA/CCA ratio, stenosis category, etc.")
 
 
     def __str__(self):
