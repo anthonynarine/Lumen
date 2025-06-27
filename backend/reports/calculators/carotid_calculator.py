@@ -1,63 +1,68 @@
-# report/calculators/carotid.py
+"""
+Carotid Calculator Module
+
+This module contains the CarotidCalculator class, which evaluates ICA/CCA ratio,
+stenosis classification, and vertebral flow interpretation per segment based on
+site-specific criteria. It also includes orchestration helpers to apply the calculator
+to an Exam instance and persist the annotated results.
+"""
 
 import logging
+import json
 from decimal import Decimal
 from typing import Optional
-import json
 
+from reports.models import Exam
+from reports.site.site_loader import load_carotid_criteria
+from reports.types.segments.carotid_segments import build_segment_dict
 from reports.calculators.base_calculator import calculate_from_segment
 from reports.types.segments.carotid_segments import CarotidSegmentDict
 
-# Setup logger
+# Configure logger
 logger = logging.getLogger(__name__)
 
 
+# ========================
+# Core Calculator Class
+# ========================
+
 class CarotidCalculator:
     """
-    CarotidCalculator applies ICA/CCA ratio, stenosis classification, and vertebral
-    interpretation logic to each segment of a carotid exam, using site-specific criteria.
+    Applies ICA/CCA ratio, stenosis classification, and vertebral interpretation logic
+    to carotid segments using site-specific JSON criteria.
 
-    This class supports dynamic rule sets loaded from JSON and ensures all output fields
-    (e.g., 'ica_cca_ratio', 'stenosis_category', 'vertebral_comment') are injected into
-    their respective segment dictionaries.
-
-    Example usage:
-        calculator = CarotidCalculator(segments, criteria)
-        calculator.run_all()
+    This calculator operates on in-memory dictionaries that represent per-segment data.
     """
 
     def __init__(self, segments: dict[str, CarotidSegmentDict], criteria: dict):
         """
-        Initialize the calculator with carotid segments and site-specific criteria.
+        Initializes the calculator.
 
         Args:
-            segments (dict): Mapping of segment key → segment dictionary.
-            criteria (dict): Threshold rules and interpretation logic from carotid.json.
+            segments (dict): Segment name to measurement dictionary.
+            criteria (dict): Site-specific JSON thresholds and rules.
         """
         self.segments = segments
         self.criteria = criteria
 
     def compute_ica_cca_ratio(self, segment: CarotidSegmentDict) -> None:
         """
-        Computes the ICA/CCA ratio using PSV and CCA PSV fields, if both are present.
-        Result is stored in the 'ica_cca_ratio' field.
+        Computes ICA/CCA ratio and stores it in the segment dictionary.
 
         Args:
-            segment (CarotidSegmentDict): A single segment dictionary.
+            segment (CarotidSegmentDict): Segment containing 'psv' and 'cca_psv'.
         """
         ratio = calculate_from_segment("psv / cca_psv", segment, ["psv", "cca_psv"])
         if ratio is not None:
             segment["ica_cca_ratio"] = float(round(ratio, 2))
-            logger.debug(f"Computed ICA/CCA ratio: {segment['ica_cca_ratio']}")
+            logger.debug(f"ICA/CCA ratio computed: {segment['ica_cca_ratio']}")
 
     def apply_stenosis_logic(self, segment: CarotidSegmentDict) -> None:
         """
-        Applies stenosis classification based on site-specific thresholds defined in JSON.
-        Uses PSV, EDV, and optionally ICA/CCA ratio to determine stenosis_category.
-        If criteria are unclear, sets fallback note in 'stenosis_notes'.
+        Applies PSV/EDV/ratio-based rules to classify ICA stenosis.
 
         Args:
-            segment (CarotidSegmentDict): A single segment dictionary.
+            segment (CarotidSegmentDict): Segment with velocity values.
         """
         psv = segment.get("psv")
         edv = segment.get("edv")
@@ -66,45 +71,37 @@ class CarotidCalculator:
         notes = []
 
         if psv is None:
-            logger.debug("PSV missing — skipping stenosis logic.")
+            logger.debug("PSV missing; skipping stenosis classification.")
             return
 
-        logger.debug(f"Evaluating stenosis: PSV={psv}, EDV={edv}, ICA/CCA={ica_cca_ratio}")
+        logger.debug(f"Stenosis evaluation: PSV={psv}, EDV={edv}, ICA/CCA={ica_cca_ratio}")
 
         if psv <= thresholds["0_19"]["psv_max"]:
             segment["stenosis_category"] = "0–19%"
-            logger.debug("Stenosis category: 0–19%")
 
         elif thresholds["20_39"]["psv_min"] <= psv <= thresholds["20_39"]["psv_max"]:
             segment["stenosis_category"] = "20–39%"
-            logger.debug("Stenosis category: 20–39%")
 
         elif thresholds["40_59"]["psv_min"] <= psv <= thresholds["40_59"]["psv_max"]:
             segment["stenosis_category"] = "40–59%"
-            logger.debug("Stenosis category: 40–59%")
 
         elif thresholds["60_79"]["psv_min"] <= psv <= thresholds["60_79"]["psv_max"]:
             if edv is not None and edv <= thresholds["60_79"]["edv_max"]:
                 if ica_cca_ratio is not None and ica_cca_ratio > thresholds["upgrade_if_ratio_gt"]:
                     segment["stenosis_category"] = "≥70% (ICA/CCA > 4)"
-                    logger.debug("Upgraded to ≥70% due to ICA/CCA > 4.")
-                    notes.append("ICA/CCA ratio > 4.0 suggests a stenosis ≥70%.")
+                    notes.append("Ratio > 4.0 suggests upgrade to ≥70% stenosis.")
                 else:
                     segment["stenosis_category"] = "60–79%"
-                    logger.debug("Stenosis category: 60–79%")
             else:
                 segment["stenosis_category"] = "Uncertain (missing or high EDV)"
-                notes.append("Unable to confirm 60–79% due to missing or elevated EDV.")
-                logger.debug("Stenosis uncertain — EDV missing or too high.")
+                notes.append("Unable to confirm 60–79% due to missing or high EDV.")
 
         elif psv >= thresholds["80_99"]["psv_min"]:
             if edv is not None and edv >= thresholds["80_99"]["edv_min"]:
                 segment["stenosis_category"] = "80–99%"
-                logger.debug("Stenosis category: 80–99%")
             else:
                 segment["stenosis_category"] = "Uncertain (PSV >240, EDV not >135)"
-                notes.append("PSV >240 suggests high-grade, but EDV criteria not met.")
-                logger.debug("Stenosis uncertain — EDV not elevated enough.")
+                notes.append("PSV suggests high-grade, but EDV does not confirm.")
 
         if notes:
             segment["stenosis_notes"] = " ".join(notes)
@@ -112,12 +109,11 @@ class CarotidCalculator:
 
     def interpret_vertebral_waveform(self, segment_key: str, segment: CarotidSegmentDict) -> None:
         """
-        Applies vertebral interpretation rules based on flow direction and waveform pattern.
-        Uses site-specific rules from criteria JSON to add a 'vertebral_comment'.
+        Adds interpretation for vertebral flow patterns based on site rules.
 
         Args:
-            segment_key (str): The key of the segment (used to identify vertebrals).
-            segment (CarotidSegmentDict): The segment dictionary.
+            segment_key (str): Name of the segment.
+            segment (CarotidSegmentDict): Segment data dictionary.
         """
         if "vertebral" not in segment_key.lower():
             return
@@ -129,55 +125,97 @@ class CarotidCalculator:
         direction = segment.get("direction", "").lower()
         waveform = segment.get("waveform", "").lower()
 
-        logger.debug(f"Vertebral analysis: direction={direction}, waveform={waveform}")
+        logger.debug(f"Vertebral flow: direction={direction}, waveform={waveform}")
 
         if direction == steal_direction:
             segment["vertebral_comment"] = "Retrograde vertebral flow is consistent with subclavian steal."
-            logger.debug("Vertebral result: subclavian steal.")
         elif waveform in pre_steal_waveforms:
-            formatted = waveform.replace("_", " ").capitalize()
-            segment["vertebral_comment"] = f"{formatted} waveform pattern indicative of pre-steal physiology."
-            logger.debug("Vertebral result: pre-steal physiology.")
+            label = waveform.replace("_", " ").capitalize()
+            segment["vertebral_comment"] = f"{label} waveform pattern indicative of pre-steal physiology."
         else:
             segment["vertebral_comment"] = "Normal vertebral flow pattern."
-            logger.debug("Vertebral result: normal pattern.")
 
     def run_all(self) -> None:
         """
-        Run all carotid logic across all segments:
-        - ICA/CCA ratio computation
-        - Stenosis classification
-        - Vertebral flow interpretation
+        Runs all carotid calculations across all segments.
         """
         for segment_key, segment in self.segments.items():
-            logger.debug(f"▶️ Processing segment: {segment_key}")
+            logger.debug(f"Processing segment: {segment_key}")
             self.compute_ica_cca_ratio(segment)
             self.apply_stenosis_logic(segment)
             self.interpret_vertebral_waveform(segment_key, segment)
-    
+
     def get_segment_data(self) -> dict[str, CarotidSegmentDict]:
         """
-        Returns the full state of the calculated segments.
-        Used for PDF export, frontend display, or HL7 payloads.
+        Returns:
+            dict: Annotated segment dictionary.
         """
         return self.segments
 
     def export_json(self, indent: int = 2) -> str:
         """
-        Converts the final segment output to a JSON string.
-        Useful for debugging or passing to external tools.
+        Serialize segment results to JSON.
 
         Args:
             indent (int): Indentation level for pretty-printing.
+
+        Returns:
+            str: JSON-encoded segment data.
         """
         return json.dumps(self.segments, indent=indent, default=str)
-    
-    def log_all_segments(self, verbose: bool = True) -> None:
+
+    def log_all_segments(self) -> None:
         """
-        Logs the full state of each segment after processing.
-        Useful for debugging or snapshotting calculator output.
+        Logs all final segment fields for debugging.
         """
         for key, segment in self.segments.items():
             logger.debug(f"Segment: {key}")
             for field, value in segment.items():
-                logger.debug(f"    {field}: {value}")
+                logger.debug(f"  {field}: {value}")
+
+
+# ========================
+# Calculator Helpers
+# ========================
+
+def save_segment_results_to_exam(exam: Exam, segment_results: dict[str, dict]) -> None:
+    """
+    Saves calculated segment data into Measurement.calculated_fields for persistence.
+
+    Args:
+        exam (Exam): Target exam instance.
+        segment_results (dict): Output from CarotidCalculator.get_segment_data().
+    """
+    for name, data in segment_results.items():
+        try:
+            segment = exam.segments.get(name=name)
+            measurement = segment.measurement
+            if not measurement:
+                logger.warning(f"Measurement missing for segment '{name}' in exam ID {exam.id}")
+                continue
+            measurement.calculated_fields = data
+            measurement.save()
+            logger.debug(f"Saved results for segment '{name}' (exam ID {exam.id})")
+        except Exception as e:
+            logger.error(f"Error saving segment '{name}' (exam ID {exam.id}): {str(e)}")
+
+
+def run_carotid_calculator(exam: Exam) -> None:
+    """
+    Applies CarotidCalculator to a given Exam and persists all results.
+
+    Args:
+        exam (Exam): The target carotid exam.
+    """
+    logger.info(f"Running carotid calculator for exam ID {exam.id}")
+
+    segments = build_segment_dict(exam)
+    site = getattr(exam, "site", "mount_sinai_gp1c")
+    criteria = load_carotid_criteria(site)
+
+    calculator = CarotidCalculator(segments, criteria)
+    calculator.run_all()
+
+    save_segment_results_to_exam(exam, calculator.get_segment_data())
+
+    logger.info(f"Carotid calculation complete and results saved for exam ID {exam.id}")
