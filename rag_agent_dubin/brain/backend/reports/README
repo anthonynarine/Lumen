@@ -1,0 +1,149 @@
+# ⚙️ LUMEN: Carotid Calculator Engine — Phase 1B (Calculator + Logic Engine)
+
+A high-performance backend engine built to compute ICA/CCA ratios, classify
+carotid stenosis, and interpret vertebral flow — all dynamically, based on 
+structured templates and site-specific rules.
+
+---
+
+## 🧬 1. Template Definition (Your Clinical DNA)
+
+
+## 1. Template Layer
+exam_templates/carotid.json
+├─ Defines segment structure and field names
+└─ Includes site-specific thresholds and waveform rules
+
+## 2. Template Loader
+template_registry.get_template(exam_type, site)
+├─ Loads carotid.json for the specified site/version
+
+## 3. Exam Factory
+exam_factory.create_exam_from_template()
+├─ Creates Exam object
+├─ Creates Segment objects for each JSON block
+└─ Initializes Measurement objects with blank values
+
+## 4. Site Criteria Loader
+site_loader.load_carotid_criteria(site)
+├─ Loads stenosis thresholds and vertebral flow rules
+├─ Normalizes site path to /site/<site>/criteria/carotid.json
+└─ Used by CarotidCalculator for site-specific logic
+
+## 5. Calculator Engine
+CarotidCalculator(segments, criteria)
+├─ .run_all()
+│ ├─ compute_ica_cca_ratio()
+│ ├─ apply_stenosis_logic()
+│ └─ interpret_vertebral_waveform()
+├─ Injects into:
+│ ├─ segment["ica_cca_ratio"]
+│ ├─ segment["stenosis_category"]
+│ └─ segment["vertebral_comment"]
+├─ Utility:
+│ ├─ get_segment_data()
+│ ├─ export_json()
+│ └─ log_all_segments()
+
+## 6. Calculator Utilities
+base_calculator.py
+├─ resolve_value_from_segment()
+├─ evaluate_expression_with_variables()
+└─ calculate_from_segment()
+
+## 7. Segment Typing
+base_arterial_segments.py
+├─ ArterialSegmentBase (TypedDict with psv, edv, etc.)
+
+carotid_segments.py
+├─ CarotidSegmentDict (extends ArterialSegmentBase)
+│ ├─ Adds cca_psv, ica_cca_ratio, stenosis_category, vertebral_comment
+
+## 8. Output
+Each segment dict holds calculated fields
+├─ Passed to frontend via API
+├─ Displayed in PDF and HL7 ORU payloads
+└─ Editable via ReportConclusion
+
+
+
+
+
+1. Template Layer
+┌───────────────────────────────┐
+│ exam_templates/carotid.json   │ ◀─ Defines segment structure + field names
+│                               │     and site-specific thresholds
+└────────────┬──────────────────┘
+             │
+             ▼
+
+2. Template Loader
+┌────────────────────────────────────────┐
+│ template_registry.get_template()       │ ◀─ Loads carotid.json per site/version
+└────────────────┬───────────────────────┘
+                 │
+                 ▼
+
+3. Exam Factory
+┌───────────────────────────────────────────────┐
+│ exam_factory.create_exam_from_template()      │
+│  ├─ Creates Exam                              │
+│  ├─ Creates Segment objects (per JSON block)  │
+│  └─ Initializes Measurement fields to null    │
+└──────────────┬────────────────────────────────┘
+               │
+               ▼
+
+4. Site Criteria Loader
+┌────────────────────────────────────────────────┐
+│ site_loader.load_carotid_criteria(site)        │ ◀─ Loads site’s carotid.json thresholds
+│  ├─ stenosis_thresholds                        │
+│  └─ vertebral_rules                            │
+└────────────────────────────┬───────────────────┘
+                             │
+                             ▼
+
+5. Calculator Engine
+┌──────────────────────────────────────────────────┐
+│ CarotidCalculator(segments, criteria)            │
+│                                                  │
+│ .run_all() → Applies:                            │
+│   ├─ compute_ica_cca_ratio()                     │
+│   ├─ apply_stenosis_logic()                      │
+│   └─ interpret_vertebral_waveform()              │
+│                                                  │
+│ Stores results in:                               │
+│   ├─ segment["ica_cca_ratio"]                    │
+│   ├─ segment["stenosis_category"]                │
+│   └─ segment["vertebral_comment"]                │
+└────────────────────────────┬────────────────────-┘
+                             │
+                             ▼
+
+6. Segment Utilities
+┌────────────────────────────────────────────────────┐
+│ base_calculator.py                                 │
+│  ├─ resolve_value_from_segment()                   │
+│  ├─ evaluate_expression_with_variables()           │
+│  └─ calculate_from_segment()                       │
+│ Used by calculator for all math + conversions      │
+└────────────────────────────────────────────────────┘
+
+7. Segment Typing
+┌────────────────────────────────────────────┐
+│ base_arterial_segments.py                  │
+│  └─ ArterialSegmentBase (TypedDict)        │
+│                                            │
+│ carotid_segments.py                        │
+│  └─ CarotidSegmentDict (extends base)      │
+└────────────────────────────────────────────┘
+
+8. Output
+┌──────────────────────────────────────────────┐
+│ segment dicts contain all derived values     │
+│ Exported via:                                │
+│  ├─ .get_segment_data()                      │
+│  ├─ .export_json()                           │
+│  └─ .log_all_segments()                      │
+│                                              │
+└──────────────────────────────────────────────┘
