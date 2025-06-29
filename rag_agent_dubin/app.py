@@ -1,45 +1,48 @@
 """
-Dubin RAG Agent Microservice
+Dubin – Master RAG Agent FastAPI App
 
-This FastAPI application serves as the entrypoint for the Dubin Agent system,
-a modular RAG (Retrieval-Augmented Generation) architecture that routes developer
-or clinical questions to specialized sub-agents (e.g., Julia for backend logic).
+Bootstraps the routing layer for developer (Julia) and clinical (Kadian) sub-agents,
+initializes shared logging configuration, and sets environment variables early.
 
-Sub-agents are powered by LangChain + OpenAI and retrieve answers from curated
-markdown files stored under the `brain/` directory.
+This file serves as the main FastAPI entrypoint for the rag_agent_dubin microservice.
 """
 
 import os
 import logging
 from decouple import config
 from fastapi import FastAPI
-from agents.julia import Julia
 
-# 🔐 Step 1: Inject OpenAI key early (before any LangChain client instantiates)
+# 🔐 Set OpenAI API key before LangChain initializes
 os.environ["OPENAI_API_KEY"] = config("OPENAI_API_KEY")
 
-# 📊 Step 2: Initialize logging system BEFORE importing any agents
+# 🧠 Configure logging before importing any agents or routers
 from logging_conf import julia_fiesta_logs
 julia_fiesta_logs()
 
-logger = logging.getLogger("router.api")
-logger.debug("🟢 Logging system initialized correctly!")
+logger = logging.getLogger("app")
+logger.debug("🟢 Logging system initialized successfully.")
 
-# 🌐 Step 3: Import Dubin router AFTER logs are ready
+# 🔀 Import Dubin router (after logging is ready)
 from master_agent.router import router
 
+# 🧪 Optional: Preload Julia on boot to verify readiness
 try:
-    test_julia = Julia()
-    print("✅ Julia loaded manually on app start")
+    from agents.julia import Julia
+    _ = Julia()
+    logger.info("✅ Julia loaded successfully during app boot.")
 except Exception as e:
-    print("❌ Julia failed to load:", e)
+    logger.error(f"❌ Julia failed to initialize: {e}")
 
-# 🚀 Step 4: Create FastAPI app
+# 🚀 Create FastAPI instance
 app = FastAPI(
     title="Dubin RAG Agent API",
-    description="Routes questions to Julia and other agents to assist with Lumen system development and clinical logic.",
+    description=(
+        "Master RAG agent for the Lumen ultrasound platform.\n\n"
+        "Routes questions to Julia (developer agent) or Kadian (clinical agent) "
+        "based on classification, and responds with context-aware answers."
+    ),
     version="1.0.0"
 )
 
-# 📡 Step 5: Register the master route
+# 🔗 Register all routes
 app.include_router(router, prefix="/agent/master")
