@@ -1,92 +1,99 @@
 """
 Julia – Developer-Focused RAG Agent for Lumen
 
-Loads only backend/frontend source files and technical documentation to
-assist with architectural, API, template, and workflow questions.
+Loads the entire Django backend source code and technical documentation
+from `brain/backend/`, and answers questions about architecture, models,
+serializers, routing, template logic, PDF/HL7 generation, etc.
 """
 
 import logging
 from pathlib import Path
-from decouple import config
-from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import TextLoader
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain.chains import RetrievalQA
+from langchain_community.chat_models import ChatOpenAI
 
 logger = logging.getLogger("agent.julia")
 
 class Julia:
-    """
-    Julia is Lumen’s development-focused RAG agent.
-
-    She specializes in questions related to:
-    - Django backend models, serializers, and views
-    - React frontend components and form logic
-    - JSON template structure and validation
-    - System architecture, CI/CD, deployment, and integrations
-    """
-
     def __init__(self):
-        """
-        Initializes Julia by loading and embedding all developer-relevant files
-        from the brain/backend/ directory.
+        logger.info("🚀 Initializing Julia agent with full backend knowledge base...")
+        print("🌟 JULIA INIT STARTED")  # DEBUGGING
+        logger.info("🌟 Julia init logger triggered")
 
-        Only includes files with .py, .json, or .md extensions.
-        Ignores __pycache__ folders and any clinical content.
-        """
-        logger.info("Initializing Julia agent...")
-
-        openai_key = config("OPENAI_API_KEY")
 
         def get_backend_files(root: str) -> list[str]:
-            """Collect all valid file paths from brain/backend/ for embedding."""
-            valid_exts = {".py", ".json", ".md"}
+            valid_exts = {".py", ".md", ".json"}
             files = [
                 str(f) for f in Path(root).rglob("*")
                 if f.suffix in valid_exts and "__pycache__" not in str(f)
             ]
-            logger.debug(f"Collected {len(files)} backend files for embedding.")
+            logger.debug(f"📁 Collected {len(files)} backend files from {root}")
             return files
 
-        # Load all text documents from backend knowledge base
+        # Load all dev documents
         dev_docs = []
         for path in get_backend_files("brain/backend"):
             try:
                 loader = TextLoader(path, encoding="utf-8", autodetect_encoding=True)
                 loaded = loader.load()
                 dev_docs.extend(loaded)
-                logger.debug(f"Loaded {len(loaded)} docs from: {path}")
+                logger.debug(f"✅ Loaded {len(loaded)} docs from: {path}")
             except Exception as e:
-                logger.warning(f"Failed to load {path}: {e}")
+                logger.warning(f"⚠️ Failed to load {path}: {e}")
 
-        # Split documents into chunks
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        logger.info(f"📦 Total loaded documents: {len(dev_docs)}")
+
+        # Split into chunks
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=100)
         chunks = splitter.split_documents(dev_docs)
-        logger.info(f"Split {len(dev_docs)} documents into {len(chunks)} chunks.")
+        logger.info(f"🔍 Split into {len(chunks)} chunks for vector indexing")
 
-        # Embed documents using FAISS
-        embeddings = OpenAIEmbeddings(openai_api_key=openai_key)
+        # Ensure indexing isn't empty
+        if not chunks:
+            raise RuntimeError("🚨 Julia: No chunks created. Check `brain/backend/` contents.")
+
+        # Log preview of chunks
+        for i, chunk in enumerate(chunks[:3]):
+            logger.debug(f"🧠 Sample chunk {i+1}:\n{chunk.page_content[:300]}")
+
+        # Build vector store
+        embeddings = OpenAIEmbeddings()
         vectorstore = FAISS.from_documents(chunks, embeddings)
-        logger.info("Created FAISS vectorstore for Julia.")
+        logger.info("🧠 FAISS vectorstore created successfully")
 
-        # Create the LangChain RetrievalQA chain
-        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", openai_api_key=openai_key)
-        self.qa = RetrievalQA.from_chain_type(llm=llm, retriever=vectorstore.as_retriever())
+        # Set up QA chain
+        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+        self.qa = RetrievalQA.from_chain_type(
+            llm=llm,
+            retriever=retriever,
+            return_source_documents=True
+        )
 
-        logger.info("Julia is ready to answer dev-related questions.")
+        logger.info("✅ Julia is fully initialized and ready to answer.")
 
     def answer(self, question: str) -> str:
-        """
-        Uses LangChain's RetrievalQA to answer a development-related question.
+        logger.info(f"📨 Julia received question: {question}")
 
-        Args:
-            question (str): A question about Lumen's code, templates, or dev architecture.
+        result = self.qa.invoke({"query": question})
+        sources = result.get("source_documents", [])
 
-        Returns:
-            str: Answer generated using embedded code and documentation.
-        """
-        logger.info(f"Julia received question: {question}")
-        result = self.qa.run(question)
-        logger.info("Julia completed response generation.")
-        return result
+        # Log relevant documents
+        for i, doc in enumerate(sources[:3]):
+            logger.debug(f"📄 Source doc {i+1}:\n{doc.page_content[:300]}")
+
+        if not sources:
+            logger.warning("⚠️ No relevant documents found for this question.")
+            return "Hmm... I couldn't find anything in the codebase that matches that. Try rephrasing?"
+
+        if "julia programming" in result["result"].lower():
+            return (
+                "I'm Julia — the dev agent for the Lumen project, not the Julia language 😅.\n"
+                "Try asking me about your backend code, models, API, or architecture!"
+            )
+
+        logger.info("✅ Julia completed response generation.")
+        return result["result"]

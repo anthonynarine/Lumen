@@ -1,9 +1,19 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from master_agent.dubin import Dubin
+from decouple import config
+import os
+
+import logging
+logger = logging.getLogger("router.api")
+
+# Ensure OpenAI key is set BEFORE Dubin is initialized
+os.environ["OPENAI_API_KEY"] = config("OPENAI_API_KEY")
 
 router = APIRouter()
-dubin = Dubin()
+
+# Lazy singleton instance
+_dubin_instance = None
 
 class QuestionInput(BaseModel):
     """
@@ -17,13 +27,17 @@ class QuestionInput(BaseModel):
 @router.post("/ask")
 async def ask_agent(input: QuestionInput):
     """
-    Route a question to Dubin, the master agent, and return a generated answer.
+    Route a question to Dubin and return the response under the agent's name as the key.
 
-    Args:
-        input (QuestionInput): Pydantic model containing the user's question.
-
-    Returns:
-        dict: A JSON object with the generated answer under the 'answer' key.
+    Example:
+    {
+        "Julia": "Here’s your answer..."
+    }
     """
-    answer = dubin.route(input.question)
-    return {"answer": answer}
+    global _dubin_instance
+
+    if _dubin_instance is None:
+        _dubin_instance = Dubin()
+
+    answer, agent = _dubin_instance.route(input.question)
+    return {agent.capitalize(): answer}

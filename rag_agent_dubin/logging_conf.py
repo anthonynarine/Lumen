@@ -1,14 +1,14 @@
 import logging.config
 import colorlog
 
-def julia_fiesta_logs():   
+def julia_fiesta_logs():
     logging_config = {
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
-            'verbose': {
+            'color_console': {
                 '()': 'colorlog.ColoredFormatter',
-                'format': '{log_color}{levelname}{reset} {yellow}{asctime}{reset} {blue}{filename}:{lineno}{reset} {green}{module}{reset} {purple}{message}',
+                'format': '{log_color}{levelname:<8}{reset} {asctime} {blue}{filename}:{lineno}{reset} {message}',
                 'style': '{',
                 'log_colors': {
                     'DEBUG': 'cyan',
@@ -17,61 +17,63 @@ def julia_fiesta_logs():
                     'ERROR': 'red',
                     'CRITICAL': 'bold_red',
                 },
-                'secondary_log_colors': {
-                    'message': {
-                        'DEBUG': 'bold_cyan',
-                        'INFO': 'bold_green',
-                        'WARNING': 'bold_yellow',
-                        'ERROR': 'bold_red',
-                        'CRITICAL': 'bold_red',
-                    },
-                },
-                'reset': True,
+            },
+            'emoji_file': {
+                'format': '{asctime} 📝 {levelname:<8} {filename}:{lineno} — {message}',
+                'style': '{',
             },
         },
         'handlers': {
             'console': {
                 'level': 'DEBUG',
                 'class': 'colorlog.StreamHandler',
-                'formatter': 'verbose',
+                'formatter': 'color_console',
             },
             'file': {
                 'level': 'DEBUG',
                 'class': 'logging.FileHandler',
                 'filename': 'debug.log',
-                'formatter': 'verbose',
+                'formatter': 'emoji_file',
+                'encoding': 'utf-8',  # Important for emoji compatibility
             },
         },
         'loggers': {
-            '': {  # root logger
+            # Root logger
+            '': {
                 'handlers': ['console', 'file'],
                 'level': 'DEBUG',
                 'propagate': True,
             },
-            # Add django logger for general request lifecycle
+
+            # Dubin RAG agents
+            'router.dubin': {
+                'handlers': ['console', 'file'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            'agent.julia': {
+                'handlers': ['console', 'file'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            'agent.kadian': {
+                'handlers': ['console', 'file'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+
+            # If Django logs are ever used in this repo
             'django': {
                 'handlers': ['console', 'file'],
                 'level': 'DEBUG',
                 'propagate': True,
             },
-            # Add django request logger to track incoming requests
             'django.request': {
                 'handlers': ['console', 'file'],
                 'level': 'DEBUG',
                 'propagate': False,
             },
-            # Add authentication logger for tracking auth-related events
-            'django_auth': {
-                'handlers': ['console', 'file'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            # Add a custom logger for JWT-related logging in views or middleware
-            'auth': {
-                'handlers': ['console', 'file'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
         },
     }
+
     logging.config.dictConfig(logging_config)

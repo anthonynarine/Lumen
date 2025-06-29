@@ -1,19 +1,6 @@
-openai_key = config("OPENAI_API_KEY")
+# agents/__init__.py
 
-loader = DirectoryLoader("brain/dev", glob="**/*.md")
-documents = loader.load()
-
-splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-chunks = splitter.split_documents(documents)
-
-embeddings = OpenAIEmbeddings(openai_api_key=openai_key)
-vectorstore = FAISS.from_documents(chunks, embeddings)
-
-self.qa = RetrievalQA.from_chain_type(
-    llm=ChatOpenAI(
-        temperature=0,
-        model="gpt-3.5-turbo",
-        openai_api_key=openai_key
-    ),
-    retriever=vectorstore.as_retriever()
-)
+"""
+Init file for agents package.
+You can expose shared constants or utilities here if needed.
+"""
