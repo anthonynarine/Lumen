@@ -98,6 +98,14 @@ def julia_fiesta_logs():
                 'encoding': 'utf-8',
                 'filters': ['redact_openai_token', 'fix_openai_logs'],
             },
+            'file_smith': {
+                'level': 'DEBUG',
+                'class': 'logging.FileHandler',
+                'filename': 'logs/smith.log',
+                'formatter': 'emoji_file',
+                'encoding': 'utf-8',
+                'filters': ['redact_openai_token', 'fix_openai_logs'],
+            },
         },
 
         'loggers': {
@@ -113,6 +121,11 @@ def julia_fiesta_logs():
             },
             'agent.kadian': {
                 'handlers': ['console', 'file_kadian'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            'agent.smith': {
+                'handlers': ['console', 'file_smith'],
                 'level': 'DEBUG',
                 'propagate': False,
             },

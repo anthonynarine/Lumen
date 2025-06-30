@@ -31,7 +31,8 @@ async def ask_agent(input: QuestionInput):
 
     Example:
     {
-        "Julia": "Here’s your answer..."
+        "agent": "Julia",
+        "answer": "Here’s your answer..."
     }
     """
     global _dubin_instance
@@ -40,4 +41,8 @@ async def ask_agent(input: QuestionInput):
         _dubin_instance = Dubin()
 
     answer, agent = _dubin_instance.route(input.question)
-    return {agent.capitalize(): answer}
+    logger.info(f"✅ Responded with {agent.capitalize()} for question: {input.question}")
+    return {
+        "agent": agent.capitalize(),
+        "answer": answer
+    }

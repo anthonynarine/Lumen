@@ -27,8 +27,8 @@ from master_agent.router import router
 
 # 🧪 Optional: Preload Julia on boot to verify readiness
 try:
-    from agents.julia import Julia
-    _ = Julia()
+    from master_agent.dubin import Dubin
+    _ = Dubin()
     logger.info("✅ Julia loaded successfully during app boot.")
 except Exception as e:
     logger.error(f"❌ Julia failed to initialize: {e}")

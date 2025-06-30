@@ -4,7 +4,7 @@
 import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 import { getToken, setToken, clearTokens } from './../auth/utils/storage';
-import { logger } from "@/utils/logger";
+import { logger } from "../utils/logger";
 
 
 interface RefreshResponse {

@@ -11,6 +11,8 @@ import logging
 import os
 from agents.julia import Julia
 from agents.kadian import Kadian
+from agents.key_maker import KeyMaker
+
 from langchain_openai import ChatOpenAI
 from decouple import config
 
@@ -32,27 +34,34 @@ class Dubin:
         "1. dev\n"
         "   - Django backend (models, serializers, views)\n"
         "   - React frontend (components, forms, validation)\n"
-        "   - APIs, auth, architecture, Redis, Celery\n"
+        "   - APIs, architecture, Redis, Celery\n"
         "   - JSON templates, PDF, HL7 generation\n\n"
         "2. clinical\n"
         "   - PSV/EDV values, ICA/CCA ratio, stenosis\n"
         "   - Carotid, renal, mesenteric, IVC protocols\n"
         "   - Waveform, plaque, report logic\n\n"
-        "Respond with one word: 'dev' or 'clinical'. If unsure, pick 'dev'."
+        "3. auth\n"
+        "   - authApi.ts, useAuth, AuthProvider\n"
+        "   - token refresh logic, JWT auth_integration\n"
+        "   - permission utils, HasRole, access control\n\n"
+        "Respond with one word: 'dev', 'clinical', or 'auth'. If unsure, pick 'dev'."
     )
 
     def __init__(self):
         logger.info("🔁 Initializing Dubin master router...")
 
-        # Set OpenAI API key
         openai_key = config("OPENAI_API_KEY")
         os.environ["OPENAI_API_KEY"] = openai_key
 
-        # Init sub-agents
+        logger.info("💻 Creating Julia agent...")
         self.julia = Julia()
+
+        logger.info("🩺 Creating Kadian agent...")
         self.kadian = Kadian()
 
-        # Init classifier LLM
+        logger.info("🛡️ Creating Agent Smith...")
+        self.key_maker = KeyMaker()
+
         self.classifier = ChatOpenAI(
             temperature=0,
             model="gpt-3.5-turbo",
@@ -81,6 +90,9 @@ class Dubin:
             if route == "clinical":
                 logger.info("🩺 Routing to Kadian (clinical)")
                 return self.kadian.answer(clean_question), "Kadian"
+            elif route == "auth":
+                logger.info("🛡️ Routing to Key Maker (auth)")
+                return self.key_maker.answer(clean_question), "KeyMaker"
             elif route == "dev":
                 logger.info("💻 Routing to Julia (dev)")
                 return self.julia.answer(clean_question), "Julia"
