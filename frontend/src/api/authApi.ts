@@ -2,20 +2,20 @@
 // 🔐 Axios instance for all Auth API communication (login, refresh, logout, etc.)
 
 import axios from "axios";
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  InternalAxiosRequestConfig,
-} from "axios";
-
+import type { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 import { getToken, setToken, clearTokens } from './../auth/utils/storage';
 import { logger } from "@/utils/logger";
+
+
+interface RefreshResponse {
+    access: string;
+}
 
 // ─────────────────────────────────────────────────────────────
 // 🔁 Refresh Token Queue
 // Ensures only one refresh request is sent while others wait
 // ─────────────────────────────────────────────────────────────
-let refreshTokenPromise: Promise<any> | null = null;
+let refreshTokenPromise: Promise<{ data: RefreshResponse }> | null = null;
 
 // ─────────────────────────────────────────────────────────────
 // 🔨 Axios Instance: Auth API
