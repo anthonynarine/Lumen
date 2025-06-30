@@ -8,12 +8,12 @@ export interface RagQueryPayload {
 }
 
 export interface RagResponse {
-  agent: string;
+  agent: string;         // e.g. Julia, Kadian
   answer: string;
   sources?: string[];
 }
 
 export const askAgent = async (payload: RagQueryPayload): Promise<RagResponse> => {
-  const response = await axios.post<RagResponse>(`${RAG_API_URL}`, payload);
+  const response = await axios.post<RagResponse>(RAG_API_URL, payload);
   return response.data;
 };

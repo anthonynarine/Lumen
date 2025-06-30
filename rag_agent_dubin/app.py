@@ -1,16 +1,9 @@
-"""
-Dubin – Master RAG Agent FastAPI App
-
-Bootstraps the routing layer for developer (Julia) and clinical (Kadian) sub-agents,
-initializes shared logging configuration, and sets environment variables early.
-
-This file serves as the main FastAPI entrypoint for the rag_agent_dubin microservice.
-"""
-
+# ...existing imports
 import os
 import logging
 from decouple import config
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  # ← Add this
 
 # 🔐 Set OpenAI API key before LangChain initializes
 os.environ["OPENAI_API_KEY"] = config("OPENAI_API_KEY")
@@ -45,6 +38,18 @@ app = FastAPI(
     version="1.0.1"
 )
 
+# 🔐 Add CORS middleware — 🔥 GLOBAL and reusable across all routes
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",      # Dev frontend
+        "https://your-frontend.com"   # Prod domain (set this correctly later)
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # 🔗 Register routers
-app.include_router(router, prefix="/oracle")  # main /ask route
-app.include_router(health_router)  # GET /health
+app.include_router(router, prefix="/oracle")
+app.include_router(health_router)
