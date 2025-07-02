@@ -7,6 +7,12 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    /* 📦 Path alias setup */
+    "baseUrl": ".",                         // ← required for "paths"
+    "paths": {
+      "@/*": ["src/*"]                      // ← maps "@/api" → "src/api"
+    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

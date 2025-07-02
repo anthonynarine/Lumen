@@ -1,29 +1,21 @@
-// src/App.tsx
-import { AuthProvider } from "./auth/context/AuthProvider";
-import { AuthTester } from "./auth/utils/TestAuth";
-
-import "./App.css";
+import { Routes, Route, Navigate } from "react-router-dom";
+import TestPage from "./pages/TestPage";
+// import DashboardPage from "./pages/DashboardPage";
+import AppShell from "./layout/AppShell/AppShell";
 
 function App() {
   return (
-    <AuthProvider>
-      <main className="app-shell">
-        <header>
-          <h1>Lumen</h1>
-          <p>Vascular Reporting Platform — Under Construction 🚧</p>
-        </header>
-
-        <section className="auth-dev">
-          <AuthTester />
-        </section>
-
-        <footer>
-          <p style={{ fontSize: "0.875rem", color: "#888" }}>
-            Auth system live — routing & UI coming next.
-          </p>
-        </footer>
-      </main>
-    </AuthProvider>
+    <Routes>
+      <Route
+        path="/test"
+        element={
+          <AppShell>
+            <TestPage />
+          </AppShell>
+        }
+      />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }
 
