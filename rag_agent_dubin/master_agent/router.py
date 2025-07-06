@@ -1,19 +1,12 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from master_agent.dubin import Dubin
-from decouple import config
-import os
+from master_agent.types import DubinState
+from master_agent.dubin_graph import dubin_graph
 
 import logging
 logger = logging.getLogger("router.api")
 
-# Ensure OpenAI key is set BEFORE Dubin is initialized
-os.environ["OPENAI_API_KEY"] = config("OPENAI_API_KEY")
-
 router = APIRouter()
-
-# Lazy singleton instance
-_dubin_instance = None
 
 class QuestionInput(BaseModel):
     """
@@ -27,22 +20,30 @@ class QuestionInput(BaseModel):
 @router.post("/ask")
 async def ask_agent(input: QuestionInput):
     """
-    Route a question to Dubin and return the response under the agent's name as the key.
+    Routes a question through the Dubin LangGraph state machine
+    and returns the final result with agent name and sources.
 
-    Example:
-    {
-        "agent": "Julia",
-        "answer": "Here’s your answer..."
-    }
+    Returns:
+        JSON:
+        {
+            "agent": "Julia",
+            "answer": "...",
+            "sources": ["brain/backend/models/report.py", ...]
+        }
     """
-    global _dubin_instance
+    logger.info(f"📥 Received question: {input.question}")
 
-    if _dubin_instance is None:
-        _dubin_instance = Dubin()
+    # Construct input state for graph
+    state: DubinState = {
+        "input": input.question
+    }
 
-    answer, agent = _dubin_instance.route(input.question)
-    logger.info(f"✅ Responded with {agent.capitalize()} for question: {input.question}")
+    # Invoke LangGraph FSM
+    result: DubinState = dubin_graph.invoke(state)
+
+    logger.info(f"✅ Routed to {result['agent']} — classification: {result['classification']}")
     return {
-        "agent": agent.capitalize(),
-        "answer": answer
+        "agent": result["agent"],
+        "answer": result["output"],
+        "sources": result.get("sources", [])
     }

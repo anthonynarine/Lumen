@@ -1,127 +1,116 @@
-            ┌────────────────────┐
-            │  External Request  │
-            │  (e.g. frontend)   │
-            └────────┬───────────┘
-                     │
-            POST /agent/master/ask
-                     │
-             via FastAPI router
-                     ▼
-        ┌──────────────────────────┐
-        │  Dubin Master Agent      │
-        │  (master_agent/dubin.py) │
-        └──────────────────────────┘
-                     │
-           Step 1: Classify question
-                     │
-            Uses LLM classifier (LangChain)
-                     ▼
-    ┌──────────────┐           ┌───────────────----┐
-    │ Label: "dev" │           │ Label: "clinical" │
-    └────┬─────────┘           └─────────┬───────--┘
-         │                               │
-         ▼                               ▼
-┌───────────────────┐        ┌────────────────────┐
-│ Julia Agent (dev) │        │ Kadian Agent       │
-│ agents/julia.py   │        │ agents/kadian.py   │
-└───────────────────┘        └────────────────────┘
-         │                               │
-         ▼                               ▼
-  Step 2: Use RAG (Embedding + QA Chain)
-         │                               │
-         ▼                               ▼
-Returns relevant answer         Returns clinical answer
-         │                               │
-         └──────────────┬───────────────-┘
-                        ▼
-              Returns JSON response
+# 🧠 Dubin – Modular LangGraph Agent System (Lumen)
 
+Dubin is a FastAPI-based, LangGraph-powered smart routing microservice that handles natural language Q\&A for the Lumen vascular ultrasound reporting system. It uses OpenAI + LangChain + FAISS to:
 
-🧠 Dubin – Modular RAG Agent System (Lumen)
+* Classify questions using a dedicated LLM prompt
+* Route them to modular LangGraph `Runnable` agents:
 
-    Dubin is a FastAPI-based smart routing microservice that powers natural language Q&A for the Lumen vascular reporting system. It uses LangChain + OpenAI to:
+  * 🧠 **Julia** → Developer knowledge (Django, architecture, backend code)
+  * 🩺 **Kadian** → Clinical knowledge (PSV/EDV, stenosis criteria, CPT/ICD codes)
+  * 🔐 **KeyMaker** → Auth and frontend logic (Auth API, JWT, roles)
 
-    Classify questions as "dev" or "clinical"
+---
 
-    Route them to specialized sub-agents:
+## 🔁 Request Lifecycle
 
-    🧠 Julia → Development knowledge of Django backend
-
-    🩺 Kadian → Clinical protocols and diagnostic criteria
-
-
+```mermaid
 flowchart TD
+    A[Frontend Request\n/agent/master/ask] --> B[Dubin Graph Entry\n(classify node)]
+    B -->|"dev"| C[RunnableJulia.invoke()]
+    B -->|"clinical"| D[RunnableKadian.invoke()]
+    B -->|"auth"| E[RunnableKeyMaker.invoke()]
 
-    A[Frontend Request<br>/agent/master/ask] --> B[Dubin Router<br>(Classification)]
-    B -->|dev| C[Julia Agent]
-    B -->|clinical| D[Kadian Agent]
-    C --> E[Backend Codebase<br>brain/backend/]
-    D --> F[Clinical Markdown<br>brain/clinical/]
-    C --> G[FAISS + LangChain QA]
-    D --> H[FAISS + LangChain QA]
-    G --> I[Answer Returned]
+    C --> F[Julia Agent.qa.invoke(query)]
+    D --> G[Kadian Agent.answer(query)]
+    E --> H[KeyMaker Agent.qa.invoke(query)]
+
+    F --> I[Answer + Sources → State]
+    G --> I
     H --> I
 
+    I --> J[JSON Response Returned]
+```
 
-    
-⚙️ How It All Works — Step by Step
+---
 
-    Step	       Component	                  Description
+## ⚙️ Execution Flow (LangGraph + FastAPI)
 
-    1️⃣	            FastAPI App (app.py)	     Starts server, loads routes and logging
-    2️⃣	            POST /agent/master/ask	     Accepts { "question": "..." } from frontend
-    3️⃣	            Dubin Router (dubin.py)	     Uses LangChain classification prompt to route
-    4️⃣	            Classifier Output	         "dev" → Julia, "clinical" → Kadian
-    5️⃣	            Julia / Kadian Called	     Relevant agent handles the question using RAG
-    6️⃣	            FAISS Vector Search	         Retrieves relevant documents using OpenAI embeddings
-    7️⃣	            LangChain QA Chain	         Constructs a final answer using retrieved context
-    8️⃣	            JSON Response Returned	     { "agent": "julia", "answer": "..." }
+| Step | Component         | Description                                                         |
+| ---- | ----------------- | ------------------------------------------------------------------- |
+| 1️⃣  | FastAPI Route     | Accepts POST `/agent/master/ask` with `{ question: "..." }`         |
+| 2️⃣  | Dubin Graph       | FSM starts at `classify` node                                       |
+| 3️⃣  | Classifier Node   | GPT-3.5 returns `"dev"`, `"clinical"`, or `"auth"`                  |
+| 4️⃣  | LangGraph Routing | Directs to `RunnableJulia`, `RunnableKadian`, or `RunnableKeyMaker` |
+| 5️⃣  | Runnable.invoke() | Wrapper injects metadata and calls real agent logic                 |
+| 6️⃣  | Agent Logic       | Calls LangChain QA chain or `.answer()` method                      |
+| 7️⃣  | Sources Extracted | Retrieved doc paths are injected into `state["sources"]`            |
+| 8️⃣  | State Returned    | Final state contains `output`, `agent`, and optional `sources`      |
 
+---
 
-🧠 Agent: Julia (Developer Agent)
-    Focus: Lumen backend structure, models, architecture
+## 🧠 Agent: Julia (Developer Agent)
 
-    Powered by: LangChain + OpenAI + FAISS
+**Focus:** Lumen backend architecture (Django, serializers, calculators)
 
-    Embeds: All .py, .md, .json files in:
-    rag_agent_dubin/brain/backend/
+**Source:** `brain/backend/` — all `.py`, `.json`, `.md`
 
+**Can answer:**
 
-Can answer:
+* "Where is the ICA calculator defined?"
+* "What serializer is used for CarotidExam?"
+* "What does the PDF export service do?"
 
-    “Where is the Exam model defined?”
+---
 
-    “How does the ICA/CCA ratio calculator work?”
+## 🩺 Agent: Kadian (Clinical Agent)
 
-    “What are the endpoints for report PDFs?”
+**Focus:** Ultrasound diagnostic criteria and documentation rules
 
+**Source:** `brain/clinical/` — carotid, renal, ABI, mesenteric PDFs
 
-🩺 Agent: Kadian (Clinical Agent)
+**Can answer:**
 
-    Focus: Clinical criteria, velocity thresholds, protocols
+* "What PSV indicates 70% ICA stenosis?"
+* "What is RAR and how is it used?"
+* "What CPT code applies to unilateral renal duplex?"
 
-    Powered by: LangChain + OpenAI + FAISS
+---
 
-    Embeds: All .md protocol files in:
-    rag_agent_dubin/brain/clinical/
+## 🔐 Agent: KeyMaker (Auth Agent)
 
+**Focus:** Auth API logic, frontend integration, token handling
 
-Can answer:
+**Source:** `brain/auth_fe/` — all `.ts`, `.tsx`, `.md` frontend auth files
 
-    “What PSV defines 70% stenosis of ICA?”
+**Can answer:**
 
-    “What is the CPT code for renal duplex?”
+* "How does the token refresh work in useAuth?"
+* "What claims are embedded in JWTs?"
+* "What role is required for editing reports?"
 
-    “How is RAR calculated?”
+---
 
+## 🧠 Classifier Prompt
 
+```text
+You are Dubin, the intelligent routing agent for the Lumen vascular ultrasound platform.
+Classify the user's question into one of these categories:
 
-Classifier Prompt (Dubin)
+1. dev
+   - Django backend (models, serializers, views)
+   - React frontend (components, forms, validation)
+   - APIs, architecture, Redis, Celery
+   - JSON templates, PDF, HL7 generation
 
-    Example system prompt:
+2. clinical
+   - PSV/EDV values, ICA/CCA ratio, stenosis
+   - Carotid, renal, mesenteric, IVC protocols
+   - Waveform, plaque, report logic
 
-    You are a classifier. Label the user’s question as:
-    - "dev" if it relates to software, backend, or Lumen architecture
-    - "clinical" if it relates to ultrasound protocols or diagnostic criteria
+3. auth
+   - authApi.ts, useAuth, AuthProvider
+   - token refresh logic, JWT auth_integration
+   - permission utils, HasRole, access control
 
-    Respond with only one word: "dev" or "clinical".
+Respond with one word: 'dev', 'clinical', or 'auth'. If unsure, pick 'dev'.
+```

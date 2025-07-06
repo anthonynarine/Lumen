@@ -1,3 +1,5 @@
+
+// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -5,7 +7,7 @@ import path from 'path';
 /**
  * Vite Configuration for Lumen Frontend
  *
- * 🔧 Features:
+ * Features:
  * - React plugin support
  * - Development-time proxy for RAG agent and image API
  * - Project-wide alias for `@` → `src/`
@@ -18,7 +20,7 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'), // 💡 Allow `@/` to mean `src/`
+      '@': path.resolve(__dirname, 'src'), // Shortcut `@/` for `src/`
     },
   },
 

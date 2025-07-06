@@ -19,13 +19,14 @@ logger.debug("🟢 Logging system initialized successfully.")
 from master_agent.router import router
 from master_agent.health import health_router
 
-# 🧪 Optional: Preload Julia on boot to verify readiness
+# 🧪 Optional: Preload LangGraph to verify agent readiness
 try:
-    from master_agent.dubin import Dubin
-    _ = Dubin()
-    logger.info("✅ Dubin loaded successfully during app boot.")
+    from master_agent.dubin_graph import dubin_graph
+    test_input = {"input": "What is ICA/CCA ratio?"}
+    _ = dubin_graph.invoke(test_input)
+    logger.info("✅ Dubin LangGraph initialized and routed correctly.")
 except Exception as e:
-    logger.error(f"❌ Dubin failed to initialize: {e}")
+    logger.exception("❌ LangGraph agent initialization failed")
 
 # 🚀 Create FastAPI instance
 app = FastAPI(
