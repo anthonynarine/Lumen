@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import TestPage from "./pages/TestPage";
 import Dashboard from "./pages/Dashboard"; // ✅ Make sure this path is correct
 import AppShell from "./layout/AppShell/AppShell";
-import TestBox from "./pages/TestBox";
 
 function App() {
 
@@ -13,7 +12,6 @@ function App() {
     <Routes>
       {/* ✅ Dashboard route wrapped in AppShell */}
       <Route path="/dashboard" element={<Dashboard />}/>
-      <Route path="/test/box" element={<TestBox />} />
 
       {/* Test route */}
       <Route

@@ -26,7 +26,7 @@ const TestPage = () => {
         <AuthProvider>
         <main className="app-shell p-6 max-w-screen-md mx-auto">
             <header>
-            <h1 className="text-3xl font-bold mb-2">Lumen</h1>
+            <h1 className="text-3xl font-bold mb-2">Testing API for Login, Register, Logout, and Rag </h1>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
                 Vascular Reporting Platform — Under Construction 🚧
             </p>

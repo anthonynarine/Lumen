@@ -1,6 +1,7 @@
 // src/layout/AppShell.tsx
 import type { ReactNode } from "react";
-import SideDrawer from "../SideDrawer/Sidebar";
+import SideDrawer from "../SideDrawer/SideDrawer"
+
 import TopNav from "../TopNav/TopNav";
 import { SidebarProvider } from "../SideDrawer/context/sidebarProvider";
 import { useSidebar } from "../SideDrawer/context/sidebarContext";
