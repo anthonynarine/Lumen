@@ -5,27 +5,14 @@ import Dashboard from "./pages/Dashboard"; // ✅ Make sure this path is correct
 import AppShell from "./layout/AppShell/AppShell";
 
 function App() {
-
-  console.log('Tailwind env:', import.meta.env.MODE);
-
   return (
-    <Routes>
-      {/* ✅ Dashboard route wrapped in AppShell */}
-      <Route path="/dashboard" element={<Dashboard />}/>
-
-      {/* Test route */}
-      <Route
-        path="/test"
-        element={
-          <AppShell>
-            <TestPage />
-          </AppShell>
-        }
-      />
-
-      {/* Redirect all other routes to /dashboard */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+    <AppShell>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/test" element={<TestPage />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </AppShell>
   );
 }
 
