@@ -8,6 +8,7 @@ import {
   getToggleContainerClass,
   drawerToggleButtonClass,
 } from "./sideDrawer.styles";
+
 import DrawerNav from "./DrawerNav";
 
 /**
@@ -27,6 +28,7 @@ import DrawerNav from "./DrawerNav";
 const SideDrawer: React.FC = () => {
   // Access open state and toggle function from context
   const { open, toggle } = useSidebar();
+
 
   return (
     // Sidebar container with width and layout styles based on `open`

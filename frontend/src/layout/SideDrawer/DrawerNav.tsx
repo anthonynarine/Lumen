@@ -20,7 +20,7 @@ import { useSidebar } from "./context/sidebarContext";
  * @returns {JSX.Element} A sidebar navigation list with responsive behavior
  */
 const DrawerNav = () => {
-  const { open } = useSidebar(); // open === true => drawer expanded
+  const { open: sidebarOpen } = useSidebar(); // open === true => drawer expanded
 
     return (
         <nav className="mt-0" aria-label="Sidebar Navigation">
@@ -31,7 +31,7 @@ const DrawerNav = () => {
                     to={href}
                     className={({ isActive }) =>
                         `group relative flex items-center py-2 transition-colors rounded-md
-                        ${!open ? "px-9 justify-start" : "px-5"}
+                        ${!sidebarOpen ? "px-9 justify-start" : "px-5"}
                         ${
                         isActive
                             ? "bg-black-200 dark:bg-black-700 text-black dark:text-white"
@@ -47,15 +47,15 @@ const DrawerNav = () => {
                     {/* Label: visible only when drawer is collapsed */}
                     <span
                         className={`ml-3 text-sm font-medium truncate whitespace-nowrap transition-all duration-300 ease-in-out
-                        ${!open ? "opacity-100 max-w-[160px]" : "opacity-0 max-w-0"}`}
+                        ${!sidebarOpen ? "opacity-100 max-w-[160px]" : "opacity-0 max-w-0"}`}
                     >
                         {label}
                     </span>
 
                     {/* Tooltip: visible only when drawer is collapsed and hovered */}
-                    {open && (
+                    {!sidebarOpen && (
                         <span
-                        className="absolute left-full top-1/2 -translate-y-1/2 ml-2 bg-black-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                        className="absolute left-full top-1/2 -translate-y-1/2 ml-2 bg-black-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none"
                         >
                         {label}
                         </span>

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { AuthTester } from "../auth/utils/TestAuth";
 import PageContainer from "../layout/MainContent/PageContainer";
 import { AuthProvider } from "../auth/context/AuthProvider";
-import { askAgent } from "@/api/ragApi";
-import { logger } from "@/utils/logger";
+import { askAgent } from "../api/ragApi";
+import { logger } from "../utils/logger";
 
 const TestPage = () => {
   const [ragResponse, setRagResponse] = useState<string | null>(null);

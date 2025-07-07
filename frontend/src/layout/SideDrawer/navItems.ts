@@ -7,6 +7,11 @@ import {
   HiOutlineClipboardList,
   HiOutlineCog,
 } from "react-icons/hi";
+import { PiRobotBold } from "react-icons/pi";
+import { GiArtificialIntelligence } from "react-icons/gi";
+import { RiRobot3Line } from "react-icons/ri";
+import { GrRobot } from "react-icons/gr";
+
 import type { ComponentType } from "react";
 
 /**
@@ -18,8 +23,9 @@ import type { ComponentType } from "react";
  */
 export type NavItem = {
     label: string;
-    href: string;
+    href?: string;
     icon: ComponentType<{ className?: string }>;
+    onClick?: () => void;
 };
 
 /**
@@ -31,10 +37,15 @@ export type NavItem = {
  * - an icon rendered with react-icons
  */
 export const navItems: NavItem[] = [
+    
     {
         label: "Dashboard",
         href: "/dashboard",
         icon: HiOutlineHome, // Home icon
+    },
+    {
+        label: "AI Assistant",
+        icon: RiRobot3Line,
     },
     {
         label: "Patients",
