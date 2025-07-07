@@ -1,6 +1,6 @@
 // src/context/SidebarContext.types.ts
 
 export interface SidebarContextProps {
-  collapsed: boolean;
+  open: boolean;
   toggle: () => void;
 }

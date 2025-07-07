@@ -6,6 +6,9 @@ import AppShell from "./layout/AppShell/AppShell";
 import TestBox from "./pages/TestBox";
 
 function App() {
+
+  console.log('Tailwind env:', import.meta.env.MODE);
+
   return (
     <Routes>
       {/* ✅ Dashboard route wrapped in AppShell */}

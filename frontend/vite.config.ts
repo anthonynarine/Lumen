@@ -1,21 +1,16 @@
+// ✅ vite.config.ts
 
-// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite'
 import path from 'path';
 
-/**
- * Vite Configuration for Lumen Frontend
- *
- * Features:
- * - React plugin support
- * - Development-time proxy for RAG agent and image API
- * - Project-wide alias for `@` → `src/`
- */
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss()
   ],
 
   resolve: {

@@ -5,11 +5,11 @@ import type { SidebarContextProps } from "./sidebarContext.types";
 const SidebarContext = createContext<SidebarContextProps | undefined>(undefined);
 
 export const SidebarProvider = ({ children }: { children: ReactNode }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const toggle = () => setCollapsed((prev) => !prev);
+  const [open, setOpen] = useState(false);
+  const toggle = () => setOpen((prev) => !prev);
 
   return (
-    <SidebarContext.Provider value={{ collapsed, toggle }}>
+    <SidebarContext.Provider value={{ open, toggle }}>
       {children}
     </SidebarContext.Provider>
   );

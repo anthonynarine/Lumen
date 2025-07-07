@@ -1,9 +1,10 @@
 // src/layout/AppShell.tsx
 import type { ReactNode } from "react";
-import Sidebar from "../Sidebar/Sidebar";
+import SideDrawer from "../SideDrawer/Sidebar";
 import TopNav from "../TopNav/TopNav";
-import { SidebarProvider } from "../context/sidebarProvider";
-import { useSidebar } from "../context/sidebarContext";
+import { SidebarProvider } from "../SideDrawer/context/sidebarProvider";
+import { useSidebar } from "../SideDrawer/context/sidebarContext";
+
 
 interface AppShellProps {
     children: ReactNode;
@@ -19,7 +20,7 @@ const Layout = ({ children }: AppShellProps) => {
 
     return (
         <div className="flex h-screen w-full bg-background-light dark:bg-background-dark text-text-default dark:text-text-inverted">
-        <Sidebar collapsed={collapsed} />
+        <SideDrawer collapsed={collapsed} />
         <div
             className="flex flex-col flex-1 overflow-hidden"
             style={{ marginLeft: `${sidebarWidth}rem` }}
