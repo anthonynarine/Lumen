@@ -8,9 +8,10 @@ import clsx from "clsx";
  */
 export const getDrawerClass = (open: boolean): string =>
   clsx(
-    "fixed top-16 left-0 h-[calc(100vh-4.5rem)] transition-all duration-300 bg-card border-r border-theme shadow-md",
+    "fixed top-16 left-0 h-[calc(100vh-4rem)] transition-all duration-300 bg-card border-r border-theme shadow-md",
     open ? "w-16" : "w-64"
   );
+
 
 /**
  * Returns the class names for the container that wraps the drawer toggle button.

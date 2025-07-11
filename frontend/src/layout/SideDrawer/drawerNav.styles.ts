@@ -21,4 +21,4 @@ export const getLabelClass = (sidebarOpen: boolean) =>
   }`;
 
 export const tooltipClass =
-  "absolute left-full top-1/2 -translate-y-1/2 ml-2 tooltip-bg tooltip-text text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition";
+  "absolute left-full top-1/2 -translate-y-1/2 ml-3 tooltip-bg tooltip-text text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition";

@@ -33,7 +33,7 @@ const DrawerNavContent = ({
     <span className={getLabelClass(sidebarOpen)}>{label}</span>
 
     {/* Tooltip (hidden unless hovered and collapsed) */}
-    {!sidebarOpen && <span className={tooltipClass}>{label}</span>}
+    {sidebarOpen && <span className={tooltipClass}>{label}</span>}
   </div>
 );
 
