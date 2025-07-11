@@ -1,3 +1,4 @@
+import React from "react";
 import PageContainer from "../layout/MainContent/PageContainer";
 
 export default function Dashboard() {
