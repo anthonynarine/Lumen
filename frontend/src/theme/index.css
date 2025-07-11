@@ -1,32 +1,47 @@
 @import "tailwindcss";
 
+/* 🌞 Light Mode Variables */
+:root {
+  --primary-bg: #f9fafb;          /* Page canvas */
+  --primary-text: #1e293b;        /* Slate for readability */
+  --secondary-bg: #f3f4f6;        /* Section backgrounds */
+  --card-bg: #f8f9fb;             /* Cards and modals */
+  --content-bg: #ffffff;          /* Main content area */
+  --accent: #2c2f36;              /* Neutral active state */
+  --border-color: #e2e8f0;        /* Light borders */
+  --sidebar-bg: #f9fafb;          /* Optional: dark sidebar for contrast */
 
-/* src/index.css */
-@import "tailwindcss";
-
-@theme {
-  --primary-bg: #ffffff;
-  --primary-text: #1a1a1a;
-  --secondary-bg: #f9fafb;
-  --card-bg: #ffffff;
-  --accent: #fb8500;
-  --border-color: #e5e7eb;
+  /* Tooltip (same in both modes) */
+  --tooltip-bg: #181818;
+  --tooltip-text: #f1f5f9;
 }
 
-.dark {
-  @theme {
-    --primary-bg: #0d1117;
-    --primary-text: #f0f6fc;
-    --secondary-bg: #161b22;
-    --card-bg: #1f2937;
-    --accent: #ffb703;
-    --border-color: #374151;
-  }
+/* 🌚 Dark Mode Overrides */
+html.dark {
+  --primary-bg: #181818;          /* Page background */
+  --primary-text: #f1f5f9;        /* Light text */
+  --secondary-bg: #1e1f24;        /* Section backgrounds */
+  --card-bg: #181818;             /* Cards and modals */
+  --content-bg: #303030;          /* Main content area */
+  --accent: #303030;              /* Soft dark highlight */
+  --border-color: #2c2f36;
+  --sidebar-bg: #303030;          /* Matches Lumen's drawer */
+
+  --tooltip-bg: #181818;
+  --tooltip-text: #f1f5f9;
 }
 
-.bg-primary    { background-color: var(--primary-bg); }
-.text-primary  { color: var(--primary-text); }
-.bg-card       { background-color: var(--card-bg); }
-.border-theme  { border-color: var(--border-color); }
-.bg-accent     { background-color: var(--accent); }
-.text-accent   { color: var(--accent); }
+/* 🎨 Utility Classes (Theme Tokens) */
+.bg-primary     { background-color: var(--primary-bg); }
+.text-primary   { color: var(--primary-text); }
+.bg-secondary   { background-color: var(--secondary-bg); }
+.bg-card        { background-color: var(--card-bg); }
+.bg-content     { background-color: var(--content-bg); }
+.bg-accent      { background-color: var(--accent); }
+.text-accent    { color: var(--accent); }
+.bg-sidebar     { background-color: var(--sidebar-bg); }
+
+.border-theme   { border-color: var(--border-color); }
+
+.tooltip-bg     { background-color: var(--tooltip-bg); }
+.tooltip-text   { color: var(--tooltip-text); }

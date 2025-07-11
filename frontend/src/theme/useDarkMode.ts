@@ -18,31 +18,46 @@ import { useEffect, useState } from "react";
  * }} An object containing the current dark mode state and a toggle function
  */
 export const useDarkMode = () => {
-  // Step 1: Initialize dark mode state
     const [isDark, setIsDark] = useState(() => {
-        // Check if user preference is saved
-        const stored = localStorage.getItem("theme");
-        if (stored) return stored === "dark";
+        if (typeof window === "undefined") return false;
 
-        // Fallback to system preference if no stored value
-        return window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const stored = localStorage.getItem("theme");
+        if (stored === "dark") {
+            console.log("🔁 Loaded from localStorage: dark");
+            return true;
+        }
+        if (stored === "light") {
+            console.log("🔁 Loaded from localStorage: light");
+            return false;
+        }
+
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        console.log(`🌙 System preference: ${prefersDark ? "dark" : "light"}`);
+        return prefersDark;
     });
 
-  // Step 2: Apply dark mode class on <html> whenever state changes
     useEffect(() => {
         const root = document.documentElement;
+        console.log("🌗 Theme changed:", isDark ? "dark" : "light");
 
         if (isDark) {
             root.classList.add("dark");
+            root.classList.remove("light");
             localStorage.setItem("theme", "dark");
         } else {
             root.classList.remove("dark");
+            root.classList.add("light");
             localStorage.setItem("theme", "light");
         }
+
+        console.log("🧠 .classList =", root.classList.toString());
+        console.log("💾 localStorage.theme =", localStorage.getItem("theme"));
     }, [isDark]);
 
-    // Step 3: Manual toggle handler
-    const toggleDarkMode = () => setIsDark((prev) => !prev);
+    const toggleDarkMode = () => {
+        console.log("🖱️ Toggle clicked → toggling theme...");
+        setIsDark((prev) => !prev);
+    };
 
     return { isDark, toggleDarkMode };
 };

@@ -1,4 +1,3 @@
-// src/layout/AppShell/AppShell.tsx
 import { ReactNode } from "react";
 import SideDrawer from "../SideDrawer/SideDrawer";
 import TopNav from "../TopNav/TopNav";
@@ -12,17 +11,23 @@ interface AppShellProps {
 
 const Layout = ({ children }: AppShellProps) => {
   const { open } = useSidebar();
-  const SIDEBAR_WIDTH_EXPANDED = 16;
-  const SIDEBAR_WIDTH_COLLAPSED = 4;
+  const SIDEBAR_WIDTH_EXPANDED = 16; // 16rem when open
+  const SIDEBAR_WIDTH_COLLAPSED = 4;  // 4rem when collapsed
   const sidebarWidth = open ? SIDEBAR_WIDTH_EXPANDED : SIDEBAR_WIDTH_COLLAPSED;
 
   return (
-    <div className="flex h-screen w-full bg-background-light dark:bg-background-dark text-text-default dark:text-text-inverted">
+    <div className="flex h-screen w-full bg-primary text-primary">
+      {/* Fixed SideDrawer overlay */}
       <SideDrawer />
+
+      {/* Spacer block to fill the width of the fixed SideDrawer */}
       <div
-        className="flex flex-col flex-1 overflow-hidden"
-        style={{ marginLeft: `${sidebarWidth}rem` }}
-      >
+        className="shrink-0 transition-all duration-300 bg-sidebar"
+        style={{ width: `${sidebarWidth}rem` }}
+      />
+
+      {/* Main area: shifts based on drawer state */}
+      <div className="flex flex-col flex-1 overflow-hidden">
         <TopNav />
         <MainContent>{children}</MainContent>
       </div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSidebar } from "./context/sidebarContext";
-import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
+import { ChevronLeft, ChevronRight } from "lucide-react"; // Lucide icons
 import {
   getDrawerClass,
   getToggleContainerClass,
@@ -26,30 +26,24 @@ import DrawerNav from "./DrawerNav";
  * @returns {JSX.Element} A styled sidebar with toggleable width and navigation
  */
 const SideDrawer: React.FC = () => {
-  // Access open state and toggle function from context
   const { open, toggle } = useSidebar();
 
-
   return (
-    // Sidebar container with width and layout styles based on `open`
     <aside className={getDrawerClass(open)}>
-      {/* Toggle Button Row */}
       <div className={getToggleContainerClass(open)}>
         <button
           onClick={toggle}
-          className={drawerToggleButtonClass}
+          className={`${drawerToggleButtonClass} text-primary`} // switched from text-black/dark:text-white
           aria-label="Toggle Drawer"
         >
-          {/* Icon changes direction depending on drawer state */}
           {open ? (
-            <HiOutlineChevronLeft className="w-5 h-5 text-black dark:text-white" />
+            <ChevronLeft className="w-5 h-5" />
           ) : (
-            <HiOutlineChevronRight className="w-5 h-5 text-black dark:text-white" />
+            <ChevronRight className="w-5 h-5" />
           )}
         </button>
       </div>
 
-      {/* Sidebar Navigation Menu */}
       <DrawerNav />
     </aside>
   );

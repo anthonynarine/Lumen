@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Red Blood Cell Emblem</title>
+  <style>
+    body {
+      background-color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <svg width="200" height="200" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Outer RBC gradient -->
+      <radialGradient id="rbcOuter" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ff7e75"/>
+        <stop offset="100%" stop-color="#b22222"/>
+      </radialGradient>
+
+      <!-- Inner dip (central concave) -->
+      <radialGradient id="rbcDip" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="transparent" />
+      </radialGradient>
+
+      <!-- Top highlight -->
+      <radialGradient id="rbcHighlight" cx="30%" cy="30%" r="30%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="transparent" />
+      </radialGradient>
+    </defs>
+
+    <!-- Outer cell -->
+    <ellipse cx="80" cy="80" rx="60" ry="35" fill="url(#rbcOuter)" />
+
+    <!-- Central dip -->
+    <ellipse cx="80" cy="80" rx="25" ry="15" fill="url(#rbcDip)" />
+
+    <!-- Highlight -->
+    <ellipse cx="60" cy="60" rx="15" ry="10" fill="url(#rbcHighlight)" />
+  </svg>
+</body>
+</html>
