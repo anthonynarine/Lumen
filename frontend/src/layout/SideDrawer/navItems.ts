@@ -22,7 +22,7 @@ export type NavItem = {
   label: string;
   href?: string;
   icon: ComponentType<{ className?: string }>;
-  onClick?: () => void;
+  actionKey?: "openRagDrawer";
 };
 
 /**
@@ -37,6 +37,7 @@ export const navItems: NavItem[] = [
   {
     label: "AI Assistant",
     icon: Bot, // Lucide's robot icon
+    actionKey: "openRagDrawer",
   },
   {
     label: "Patients",

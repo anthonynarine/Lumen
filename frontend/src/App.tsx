@@ -2,7 +2,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import TestPage from "./pages/TestPage";
-import Dashboard from "./pages/Dashboard"; // ✅ Make sure this path is correct
+import Dashboard from "./pages/Dashboard"; 
 import AppShell from "./layout/AppShell/AppShell";
 
 function App() {
