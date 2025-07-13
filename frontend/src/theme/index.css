@@ -18,16 +18,16 @@
 
 /* 🌚 Dark Mode Overrides */
 html.dark {
-  --primary-bg: #181818;          /* Page background */
+  --primary-bg: #030303;          /* Page background */
   --primary-text: #f1f5f9;        /* Light text */
   --secondary-bg: #1e1f24;        /* Section backgrounds */
-  --card-bg: #181818;             /* Cards and modals */
-  --content-bg: #303030;          /* Main content area */
-  --accent: #303030;              /* Soft dark highlight */
+  --card-bg: #030303;             /* Cards and modals */
+  --content-bg: #0E0E0E;          /* Main content area */
+  --accent: #0E0E0E;              /* Soft dark highlight */
   --border-color: #2c2f36;
-  --sidebar-bg: #303030;          /* Matches Lumen's drawer */
+  --sidebar-bg: #0E0E0E;          /* Matches Lumen's drawer */
 
-  --tooltip-bg: #181818;
+  --tooltip-bg: #030303;
   --tooltip-text: #f1f5f9;
 }
 
@@ -45,3 +45,28 @@ html.dark {
 
 .tooltip-bg     { background-color: var(--tooltip-bg); }
 .tooltip-text   { color: var(--tooltip-text); }
+
+
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* 🎨 Sleek scrollbar for assistant */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #3f3f3f;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -32,7 +32,7 @@ const Layout = ({ children }: AppShellProps) => {
       <div className="flex flex-col flex-1 overflow-hidden">
         <TopNav />
         <MainContent>{children}</MainContent>
-        gi<RagDrawer />
+        <RagDrawer />
         {/* Optional: <RagToggleButton /> if you want a floating button too */}
       </div>
     </div>
