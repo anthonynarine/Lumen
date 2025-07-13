@@ -4,6 +4,8 @@ import TopNav from "../TopNav/TopNav";
 import MainContent from "../MainContent/MainContent";
 import { SidebarProvider } from "../SideDrawer/context/sidebarProvider";
 import { useSidebar } from "../SideDrawer/context/sidebarContext";
+import { RagProvider } from "../../rag/context/RagProvider"
+import RagDrawer from "../../rag/components/RagDrawer";
 
 interface AppShellProps {
   children: ReactNode;
@@ -30,6 +32,8 @@ const Layout = ({ children }: AppShellProps) => {
       <div className="flex flex-col flex-1 overflow-hidden">
         <TopNav />
         <MainContent>{children}</MainContent>
+        gi<RagDrawer />
+        {/* Optional: <RagToggleButton /> if you want a floating button too */}
       </div>
     </div>
   );
@@ -37,7 +41,9 @@ const Layout = ({ children }: AppShellProps) => {
 
 const AppShell = ({ children }: AppShellProps) => (
   <SidebarProvider>
-    <Layout>{children}</Layout>
+      <RagProvider>
+        <Layout>{children}</Layout>
+      </RagProvider>
   </SidebarProvider>
 );
 

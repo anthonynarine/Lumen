@@ -7,7 +7,7 @@ import InputBox from "./InputBox";
 const RagDrawer = () => {
     const { isOpen, closeDrawer, messages } = useRagContext();
     const bottomRef = useRef<HTMLDivElement>(null);
-
+    console.log("Drawer open?", isOpen);
     useEffect(() => {
         if (bottomRef.current) {
         bottomRef.current.scrollIntoView({ behavior: "smooth" });
