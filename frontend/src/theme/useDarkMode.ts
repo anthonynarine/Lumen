@@ -23,7 +23,7 @@ export const useDarkMode = () => {
 
         const stored = localStorage.getItem("theme");
         if (stored === "dark") {
-            console.log("🔁 Loaded from localStorage: dark");
+            // console.log("🔁 Loaded from localStorage: dark");
             return true;
         }
         if (stored === "light") {
@@ -32,13 +32,12 @@ export const useDarkMode = () => {
         }
 
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        console.log(`🌙 System preference: ${prefersDark ? "dark" : "light"}`);
         return prefersDark;
     });
 
     useEffect(() => {
         const root = document.documentElement;
-        console.log("🌗 Theme changed:", isDark ? "dark" : "light");
+        // console.log("🌗 Theme changed:", isDark ? "dark" : "light");
 
         if (isDark) {
             root.classList.add("dark");
@@ -50,12 +49,10 @@ export const useDarkMode = () => {
             localStorage.setItem("theme", "light");
         }
 
-        console.log("🧠 .classList =", root.classList.toString());
-        console.log("💾 localStorage.theme =", localStorage.getItem("theme"));
     }, [isDark]);
 
     const toggleDarkMode = () => {
-        console.log("🖱️ Toggle clicked → toggling theme...");
+        // console.log("🖱️ Toggle clicked → toggling theme...");
         setIsDark((prev) => !prev);
     };
 
