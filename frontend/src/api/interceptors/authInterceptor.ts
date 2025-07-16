@@ -1,32 +1,35 @@
+import React from "react";
 import type { AxiosInstance, AxiosError, AxiosRequestConfig } from "axios";
 import { getToken,setToken, clearTokens } from "../../auth/utils/storage";
+import { logger } from "../../utils/logger";
 
-import 
 
 /**
- * Shape of the response returned by a successful token refresh call.
+ * Interface for a successful response from the token refresh endpoint.
  */
 interface RefreshResponse {
   access: string;
 }
 
 /**
- * Ensures only one refresh request is sent at a time.
- * Prevents multiple simultaneous retries from racing.
+ * Shared promise to prevent multiple concurrent token refresh requests.
+ * This ensures that if many requests fail with 401 at once,
+ * only one actual refresh request is sent to the backend.
  */
 let refreshTokenPromise: Promise<{ data: RefreshResponse }> | null = null;
 
 /**
- * authInterceptor
+ * Attaches authentication and session management logic to a given Axios instance.
  *
- * Attaches full authentication logic to a provided Axios instance.
  * This includes:
- * - Adding Bearer token to all requests
- * - Automatically refreshing access tokens on 401 responses
- * - Retrying failed requests once after refresh
- * - Redirecting to login if refresh fails
+ * - Automatically attaching the access token to all requests.
+ * - Detecting expired tokens (401) and refreshing them using the refresh token.
+ * - Retrying the original request exactly once after refreshing the token.
+ * - Clearing tokens and redirecting to login on refresh failure.
  *
- * @param {AxiosInstance} api - An Axios instance to attach auth logic to
+ * This function can be applied to any Axios instance (e.g., `authApi`, `examApi`).
+ *
+ * @param {AxiosInstance} api - The Axios instance to enhance with auth behavior.
  *
  * @example
  * import axios from "axios";
@@ -37,7 +40,10 @@ let refreshTokenPromise: Promise<{ data: RefreshResponse }> | null = null;
  * export default examApi;
  */
 export function authInterceptor(api: AxiosInstance): void {
-  // 🔐 Request Interceptor — Inject token into every outgoing request
+  // ─────────────────────────────────────────────────────
+  // Request Interceptor
+  // Adds the access token to Authorization header before sending any request
+  // ─────────────────────────────────────────────────────
   api.interceptors.request.use((config) => {
     const token = getToken("access_token");
     if (token) {
@@ -46,16 +52,22 @@ export function authInterceptor(api: AxiosInstance): void {
     return config;
   });
 
-  // 🔁 Response Interceptor — Handle 401 + refresh + retry
+  // ─────────────────────────────────────────────────────
+  // Response Interceptor
+  // Handles:
+  //  - Successful token rotation if new tokens are returned
+  //  - Logout cleanup on `/logout`
+  //  - Automatic refresh and retry of original request if 401
+  // ─────────────────────────────────────────────────────
   api.interceptors.response.use(
     (response) => {
       const { access, refresh } = response.data || {};
 
-      // Store new tokens if provided
+      // Store new tokens if returned by backend
       if (access) setToken("access_token", access);
       if (refresh) setToken("refresh_token", refresh);
 
-      // If logout, clear tokens
+      // Clear tokens if hitting logout route
       if (response.config.url?.includes("/logout")) {
         clearTokens();
       }
@@ -63,10 +75,17 @@ export function authInterceptor(api: AxiosInstance): void {
       return response;
     },
 
+    /**
+     * Handles expired access tokens by refreshing and retrying the original request.
+     * If refresh fails, logs out the user and redirects to login page.
+     *
+     * @param {AxiosError} error - The original error returned from Axios
+     * @returns {Promise<any>} - A retry of the original request, or rejection if failed
+     */
     async (error: AxiosError) => {
       const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-      // Handle expired token (401)
+      // Attempt token refresh on first 401 only
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
@@ -79,7 +98,7 @@ export function authInterceptor(api: AxiosInstance): void {
         }
 
         try {
-          // Queue refresh if not already in progress
+          // Only send one refresh request, even if multiple calls fail
           if (!refreshTokenPromise) {
             refreshTokenPromise = api.post("/auth/token-refresh/", {
               refresh: refreshToken,
@@ -92,7 +111,7 @@ export function authInterceptor(api: AxiosInstance): void {
           // Store new access token
           setToken("access_token", data.access);
 
-          // Retry original request with new token
+          // Retry the original failed request with new token
           originalRequest.headers = {
             ...originalRequest.headers,
             Authorization: `Bearer ${data.access}`,
@@ -108,6 +127,7 @@ export function authInterceptor(api: AxiosInstance): void {
         }
       }
 
+      // If not 401 or already retried, propagate the error
       return Promise.reject(error);
     }
   );
