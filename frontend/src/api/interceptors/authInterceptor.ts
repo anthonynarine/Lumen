@@ -19,9 +19,9 @@ interface RefreshResponse {
 let refreshTokenPromise: Promise<{ data: RefreshResponse }> | null = null;
 
 /**
- * Attaches authentication and session management logic to a given Axios instance.
+ * Injects authentication and token lifecycle management into an Axios instance.
  *
- * This includes:
+ * Core Responsibilities:
  * - Automatically attaching the access token to all requests.
  * - Detecting expired tokens (401) and refreshing them using the refresh token.
  * - Retrying the original request exactly once after refreshing the token.
