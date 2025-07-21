@@ -1,4 +1,6 @@
-import { SideMeasurements } from "./form";
+
+import { SideMeasurements } from "./carotidExamFormTypes"
+
 
 /**
  * Represents grouped segment measurements for both sides of a carotid exam.

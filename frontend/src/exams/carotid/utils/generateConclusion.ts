@@ -1,7 +1,8 @@
 // src/exams/carotid/generateConclusion.ts
 
-import { CarotidFormValues } from "./types/CarotidTypes";
-import { CarotidCalculations } from "../hooks/carotid-hooks/useCarotidCalculator"; // 🧠 type only
+import { CarotidFormValues } from "../types/carotidExamFormTypes";
+import { CarotidCalculations } from "../types/carotidCalculationsTypes";
+
 
 /**
  * Generates a formatted clinical impression for a carotid duplex ultrasound exam.

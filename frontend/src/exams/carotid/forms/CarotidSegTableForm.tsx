@@ -1,33 +1,27 @@
 // src/exams/carotid/SegmentTable.tsx
 
 import React from "react";
-import { SegmentDefinition } from "./types/template"; // Segment labels + ids from template
-import { SideMeasurements } from "./types/form"; // Formik values: { prox_ica: { psv, edv } }
-
-type SegmentTableProps = {
-  /** Side of the body this table represents */
-  side: "right" | "left";
-
-  /** Template-defined segments for this side */
-  segments: SegmentDefinition[];
-
-  /** Live Formik form values for this side */
-  values: SideMeasurements;
-
-  /** Formik-provided method to update nested field values */
-  setFieldValue: (field: string, value: number | undefined) => void;
-};
+import { SegmentTableProps } from "../types";
 
 /**
- * Renders a dynamic PSV/EDV input table for carotid artery segments.
- * Connected to Formik via `values` and `setFieldValue`.
+ * SegmentTable
+ *
+ * Renders a dynamic table for a single side (right or left) of the neck
+ * using template-defined segments (e.g., CCA, ICA, ECA).
+ *
+ * For each segment, it provides editable input fields for PSV (Peak Systolic Velocity)
+ * and EDV (End Diastolic Velocity), connected to Formik via `values` and `setFieldValue`.
+ *
+ * @component
+ * @param {SegmentTableProps} props - The side, template segments, form values, and updater function
+ * @returns {JSX.Element}
  */
-export const SegmentTable = ({
+export const CarotidSegmentTable = ({
   side,
   segments,
   values,
   setFieldValue,
-}: SegmentTableProps) => {
+}: SegmentTableProps): JSX.Element => {
   return (
     <div className="overflow-x-auto border rounded-md shadow-sm">
       <table className="w-full table-auto text-sm">
@@ -40,14 +34,18 @@ export const SegmentTable = ({
         </thead>
         <tbody>
           {segments.map((segment) => {
+            // Build the fully qualified Formik key, e.g. "right.prox_ica"
             const segmentKey = `${side}.${segment.id}`;
+
+            // Pull current values for this segment from Formik state
             const segmentValues = values[segment.id] || {};
 
             return (
               <tr key={segment.id} className="border-t border-border">
+                {/* Segment label from template (e.g., "Proximal ICA") */}
                 <td className="p-2">{segment.label}</td>
 
-                {/* PSV input */}
+                {/* PSV input field */}
                 <td className="p-2">
                   <input
                     type="number"
@@ -56,11 +54,12 @@ export const SegmentTable = ({
                       const value = parseFloat(e.target.value);
                       setFieldValue(`${segmentKey}.psv`, isNaN(value) ? undefined : value);
                     }}
+                    placeholder="PSV"
                     className="w-full px-2 py-1 border rounded dark:bg-gray-800"
                   />
                 </td>
 
-                {/* EDV input */}
+                {/* EDV input field */}
                 <td className="p-2">
                   <input
                     type="number"
@@ -69,6 +68,7 @@ export const SegmentTable = ({
                       const value = parseFloat(e.target.value);
                       setFieldValue(`${segmentKey}.edv`, isNaN(value) ? undefined : value);
                     }}
+                    placeholder="EDV"
                     className="w-full px-2 py-1 border rounded dark:bg-gray-800"
                   />
                 </td>

@@ -92,7 +92,7 @@ export interface CreateExamPayload {
   indication_code: string;
 
   /** Study scope (laterality) */
-  scope: "bilateral" | "unilateral" | "limited";
+  exam_scope: "bilateral" | "unilateral" | "limited";
 
   /** Study extent (e.g. "follow-up") */
   extent: string;
@@ -108,6 +108,9 @@ export interface CreateExamPayload {
 
   /** Optional surgical/operative history */
   operative_history?: string;
+  ordering_physician: string;
+  clinical_indication: string;
+  site: string;
 }
 
 /**

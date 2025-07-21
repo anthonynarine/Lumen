@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import TestPage from "./pages/TestPage";
 import Dashboard from "./pages/Dashboard"; 
 import AppShell from "./layout/AppShell/AppShell";
-import { CarotidExamPage } from "./pages/CarotidExamPage";
+import { CarotidExamPage } from "./exams/carotid/pages/CarotidExamPage";
 
 function App() {
   return (

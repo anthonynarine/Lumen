@@ -1,46 +1,31 @@
+// src/exams/carotid/utils/calculateCarotidStenosis.ts
+
 /**
- * Utility to calculate ICA/CCA ratio and stenosis category for carotid exams.
- * Mirrors backend logic for classifying ICA stenosis using PSV, EDV, and ICA/CCA ratio.
+ * Utility to calculate ICA/CCA ratio and classify carotid stenosis severity.
+ * Mirrors backend logic based on Mount Sinai vascular lab velocity criteria.
  * 
- * This is based on Mount Sinai vascular lab velocity criteria.
+ * - Input: PSV and EDV measurements from the proximal ICA and CCA
+ * - Output: Stenosis range and notes per side (right/left)
  */
 
-export type Segment = {
-  psv?: number;
-  edv?: number;
-  ica_cca_ratio?: number;
-};
-
-export type SegmentValues = {
-  [segmentId: string]: Segment;
-};
-
-export type CarotidValues = {
-  right: SegmentValues;
-  left: SegmentValues;
-};
-
-export type StenosisResult = {
-  percent?: string;
-  notes?: string;
-  icaCcaRatio?: number;
-};
-
-export type CalcResult = {
-  stenosisRight: StenosisResult;
-  stenosisLeft: StenosisResult;
-};
-
-// ✅ Used across UI, PDF, HL7, etc.
-export type CarotidCalculations = CalcResult;
+import {
+  CarotidValues,
+  Segment,
+  StenosisResult,
+  CalcResult,
+} from "../types/carotidCalculationsTypes";
 
 /**
- * Computes stenosis classification and ICA/CCA ratios from raw PSV/EDV data.
+ * Main calculator function. Evaluates ICA/CCA ratio and velocity thresholds to assign stenosis grades.
  *
- * @param values - Measurement data for left/right ICA + CCA
- * @returns Classification result per side with ratio and notes
+ * @param values - Raw PSV/EDV data for right and left carotid segments
+ * @returns Classification result for both sides including ICA/CCA ratio and interpretation
  */
 export const calculateCarotidStenosis = (values: CarotidValues): CalcResult => {
+  /**
+   * Internal velocity thresholds used for classification.
+   * Based on institutional diagnostic criteria.
+   */
   const thresholds = {
     "0_19": { psv_max: 124 },
     "20_39": { psv_min: 125, psv_max: 154 },
@@ -50,6 +35,12 @@ export const calculateCarotidStenosis = (values: CarotidValues): CalcResult => {
     upgrade_if_ratio_gt: 4.0,
   };
 
+  /**
+   * Classifies stenosis based on ICA PSV, EDV, and ICA/CCA ratio.
+   *
+   * @param segment - A single carotid segment’s PSV, EDV, and computed ratio
+   * @returns Result with stenosis percentage and optional explanatory notes
+   */
   const classifyStenosis = (segment: Segment): StenosisResult => {
     const { psv, edv, ica_cca_ratio } = segment;
     const result: StenosisResult = {};
@@ -89,11 +80,16 @@ export const calculateCarotidStenosis = (values: CarotidValues): CalcResult => {
     return result;
   };
 
+  /**
+   * Computes the ICA/CCA ratio, rounded to 2 decimal places.
+   * Returns undefined if values are missing or invalid.
+   */
   const computeRatio = (icaPsv?: number, ccaPsv?: number): number | undefined => {
     if (!icaPsv || !ccaPsv || ccaPsv === 0) return undefined;
     return parseFloat((icaPsv / ccaPsv).toFixed(2));
   };
 
+  // Extract ICA and CCA PSV values for both sides
   const icaRight = values.right?.prox_ica?.psv;
   const ccaRight = values.right?.prox_cca?.psv;
   const ratioRight = computeRatio(icaRight, ccaRight);
@@ -102,6 +98,7 @@ export const calculateCarotidStenosis = (values: CarotidValues): CalcResult => {
   const ccaLeft = values.left?.prox_cca?.psv;
   const ratioLeft = computeRatio(icaLeft, ccaLeft);
 
+  // Build segment objects including computed ratio
   const rightSegment: Segment = {
     ...values.right?.prox_ica,
     ica_cca_ratio: ratioRight,
@@ -112,6 +109,7 @@ export const calculateCarotidStenosis = (values: CarotidValues): CalcResult => {
     ica_cca_ratio: ratioLeft,
   };
 
+  // Return classified results
   return {
     stenosisRight: {
       ...classifyStenosis(rightSegment),

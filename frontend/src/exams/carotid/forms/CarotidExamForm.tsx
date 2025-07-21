@@ -2,33 +2,12 @@ import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
-import { SegmentTable } from "./SegmentTable";
-import { calculateCarotidStenosis } from "./utils/CaroitdCalculations";
-import { generateConclusion } from "./generateConclusion";
-import {
-  CarotidFormValues,
-  SideMeasurements,
-  SegmentDefinition,
-} from "./types/CarotidTypes";
+import { CarotidSegmentTable } from "../forms/CarotidSegTableForm"
+import { calculateCarotidStenosis } from "../utils/CaroitdCalculations";
+import { generateConclusion } from "../utils/generateConclusion";
+import { CarotidFormValues, SideMeasurements } from "../types/carotidExamFormTypes";
+import { CarotidExamFormProps } from "../types/carotidExamFormTypes";
 
-type CarotidExamFormProps = {
-  /**
-   * Carotid exam segment template loaded from JSON.
-   */
-  template: {
-    right: SegmentDefinition[];
-    left: SegmentDefinition[];
-  };
-
-  /**
-   * Logged-in user object.
-   */
-  user: {
-    id: string;
-    name: string;
-    role: "technologist" | "physician" | string;
-  };
-};
 
 /**
  * CarotidExamForm
@@ -79,7 +58,7 @@ export const CarotidExamForm = ({ template, user }: CarotidExamFormProps): JSX.E
           <Form className="space-y-6">
             {/* === Right Side === */}
             <h2 className="text-lg font-semibold">Right Side</h2>
-            <SegmentTable
+            <CarotidSegmentTable
               side="right"
               segments={template.right}
               values={values.right}
@@ -88,7 +67,7 @@ export const CarotidExamForm = ({ template, user }: CarotidExamFormProps): JSX.E
 
             {/* === Left Side === */}
             <h2 className="text-lg font-semibold mt-8">Left Side</h2>
-            <SegmentTable
+            <CarotidSegmentTable
               side="left"
               segments={template.left}
               values={values.left}

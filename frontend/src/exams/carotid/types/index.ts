@@ -1,6 +1,7 @@
 // src/exams/carotid/types/index.ts
 
-export * from "./core";
-export * from "./form";
-export * from "./apiResponse";
-export * from "./template";
+export * from "./sharedTypes";
+export * from "./carotidExamFormTypes";
+export * from "./apiResponsetypes";
+export * from "./carotidTemplateTypes";
+export * from "./carotidCalculationsTypes";
