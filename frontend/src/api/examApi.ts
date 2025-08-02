@@ -1,6 +1,6 @@
 // src/api/examApi.ts
 
-import { CreateExamPayload, Exam } from "../exams/carotid/types/core";
+import { CreateExamPayload } from "../exams/carotid/types";
 
 /**
  * Axios instance configured for the main Exam API.

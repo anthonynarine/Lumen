@@ -4,7 +4,7 @@ import React from "react";
 import { SegmentTableProps } from "../types";
 
 /**
- * SegmentTable
+ * CarotidSegmentTable
  *
  * Renders a dynamic table for a single side (right or left) of the neck
  * using template-defined segments (e.g., CCA, ICA, ECA).
@@ -33,19 +33,13 @@ export const CarotidSegmentTable = ({
           </tr>
         </thead>
         <tbody>
-          {segments.map((segment) => {
-            // Build the fully qualified Formik key, e.g. "right.prox_ica"
+          {Object.values(segments).map((segment) => {
             const segmentKey = `${side}.${segment.id}`;
-
-            // Pull current values for this segment from Formik state
             const segmentValues = values[segment.id] || {};
 
             return (
               <tr key={segment.id} className="border-t border-border">
-                {/* Segment label from template (e.g., "Proximal ICA") */}
                 <td className="p-2">{segment.label}</td>
-
-                {/* PSV input field */}
                 <td className="p-2">
                   <input
                     type="number"
@@ -58,8 +52,6 @@ export const CarotidSegmentTable = ({
                     className="w-full px-2 py-1 border rounded dark:bg-gray-800"
                   />
                 </td>
-
-                {/* EDV input field */}
                 <td className="p-2">
                   <input
                     type="number"

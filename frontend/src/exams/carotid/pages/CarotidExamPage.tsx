@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { CarotidTemplate } from "../types/carotidTemplateTypes";
 import { CarotidExamForm } from "../forms/CarotidExamForm";
+import { buildCarotidTemplate } from "../utils/parseCarotidTemplate";
 import { User } from "../../../types/userType";
+import examApi from "../../../api/examApi";
 
 /**
  * CarotidExamPage
@@ -23,9 +25,13 @@ export const CarotidExamPage = () => {
   useEffect(() => {
     const fetchTemplate = async () => {
       try {
-        const res = await fetch("/exam_templates/carotid.json");
-        const data = await res.json();
-        setTemplate(data);
+        const res = await examApi.get("/api/templates/carotid/?site=mount_sinai_hospital");
+
+        // Extract and transform segments
+        const rawSegments = res.data.template.segments;
+        const parsedTemplate = buildCarotidTemplate(rawSegments);
+
+        setTemplate(parsedTemplate);
       } catch (err) {
         console.error("Failed to load carotid template:", err);
       } finally {
@@ -44,10 +50,7 @@ export const CarotidExamPage = () => {
       <h1 className="text-2xl font-semibold mb-6">🧠 Carotid Duplex Exam</h1>
 
       <CarotidExamForm
-        template={{
-          right: Object.values(template.right),
-          left: Object.values(template.left),
-        }}
+        template={template}
         user={user}
         examId={101}
         initialNotes=""

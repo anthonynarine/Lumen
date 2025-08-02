@@ -13,8 +13,9 @@ These endpoints orchestrate interaction between the frontend and the calculator/
 """
 
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 
 from report_template.registry.template_registry import get_template
@@ -33,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_carotid_template(request):
     """
     Returns the carotid JSON template for front-end form rendering.

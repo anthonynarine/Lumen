@@ -15,10 +15,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
+AUTH_API_URL = config("AUTH_API_URL")
 
 
 ALLOWED_HOSTS = [ 'localhost', '127.0.0.1',]
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:5173",]
 CORS_ALLOW_CREDENTIALS = True  
 
 
@@ -43,10 +44,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
