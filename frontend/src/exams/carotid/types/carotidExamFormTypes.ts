@@ -3,41 +3,44 @@
 import { User } from "../../../types/userType";
 import { SegmentDefinition, CarotidTemplate } from "./carotidTemplateTypes";
 
-// ===============================
-// 📋 Carotid Exam Formik Types
-// ===============================
-
-/**
- * Represents a single segment’s editable measurements.
- * Used as the value shape for inputs in <SegmentTable />.
- */
+/** Editable measurements captured for a single segment row. */
 export type SegmentMeasurement = {
   psv?: number;
   edv?: number;
+  // Optional future fields (kept here so rows can bind safely)
+  stenosisPercent?: string;
+  plaquePresent?: boolean;
+  waveformShape?: "Triphasic" | "Biphasic" | "Monophasic";
+  direction?: "Antegrade" | "Retrograde";
+  diseaseFinding?: "FMD" | "Dissection" | "String of Beads";
 };
 
-/**
- * Maps segment IDs (e.g., "prox_ica") to their corresponding measurements.
- * Each side (right/left) of the carotid exam uses this structure.
- */
-export type SideMeasurements = {
-  [segmentId: string]: SegmentMeasurement;
+/** Map of segmentId -> SegmentMeasurement for one side. */
+export type SideMeasurements = Record<string, SegmentMeasurement>;
+
+/** Patient & exam metadata captured at the top of the form. */
+export type CarotidMetadata = {
+  patientName: string;
+  mrn: string;
+  accessionNumber: string;
+  dateOfBirth: string; // ISO yyyy-mm-dd
+  examDate: string;    // ISO yyyy-mm-dd
+  referringMd: string;
+  orderingMd: string;
+  laterality: "bilateral" | "unilateral_right" | "unilateral_left" | "limited";
+  icd10Codes: string[];  // multi-select
+  cptCode: string;       // auto-derived
 };
 
-/**
- * Formik-compatible top-level form state for the Carotid Exam.
- * Includes bilateral segment measurements and free-text notes.
- */
+/** Top-level Formik state for the Carotid Exam. */
 export type CarotidFormValues = {
+  metadata: CarotidMetadata;
   right: SideMeasurements;
   left: SideMeasurements;
   notes: string;
 };
 
-/**
- * Props passed to the CarotidExamForm component.
- * Enables dynamic rendering and backend linkage.
- */
+/** CarotidExamForm props. */
 export type CarotidExamFormProps = {
   template: CarotidTemplate;
   user: User;
@@ -45,13 +48,10 @@ export type CarotidExamFormProps = {
   initialNotes: string;
 };
 
-/**
- * Props passed to the <SegmentTable /> component.
- * Handles dynamic input rendering and Formik value updates.
- */
+/** Segment table props (per side). */
 export type SegmentTableProps = {
   side: "right" | "left";
   segments: SegmentDefinition[];
   values: SideMeasurements;
-  setFieldValue: (field: string, value: number | undefined) => void;
+  setFieldValue: (field: string, value: number | string | boolean | undefined) => void;
 };
