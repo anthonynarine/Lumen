@@ -5,7 +5,7 @@ const Login = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 
-	const { login } = useAuth();
+	const { login, logout } = useAuth();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -61,6 +61,12 @@ const Login = () => {
 						className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
 					>
 						Login
+					</button>
+					<button
+						onClick={logout}
+						className="mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+					>
+						Logout
 					</button>
 				</form>
 			</div>
