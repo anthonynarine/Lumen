@@ -142,7 +142,8 @@
       ],
       "plaque": true,
       "waveform": true,
-      "direction": false
+      "direction": false,
+      "stenosis": true
     },
     {
       "id": "mid_ica_right",
@@ -162,7 +163,8 @@
       ],
       "plaque": true,
       "waveform": true,
-      "direction": false
+      "direction": false,
+      "stenosis": true
     },
     {
       "id": "dist_ica_right",
@@ -182,7 +184,8 @@
       ],
       "plaque": true,
       "waveform": true,
-      "direction": false
+      "direction": false,
+      "stenosis": true
     },
     {
       "id": "origin_vertebral_right",
@@ -438,7 +441,8 @@
       ],
       "plaque": true,
       "waveform": true,
-      "direction": false
+      "direction": false,
+      "stenosis": true
     },
     {
       "id": "mid_ica_left",
@@ -458,7 +462,8 @@
       ],
       "plaque": true,
       "waveform": true,
-      "direction": false
+      "direction": false,
+      "stenosis": true
     },
     {
       "id": "dist_ica_left",
@@ -478,7 +483,8 @@
       ],
       "plaque": true,
       "waveform": true,
-      "direction": false
+      "direction": false,
+      "stenosis": true
     },
     {
       "id": "origin_vertebral_left",
@@ -684,6 +690,36 @@
           "superficial_temporal_left"
         ]
       }
+    ]
+  },
+  "dropdowns": {
+    "stenosisPercent": [
+      "Normal",
+      "0\u201319%",
+      "20\u201339%",
+      "40\u201359%",
+      "60\u201379%",
+      "80\u201399%",
+      "Occluded",
+      "String Sign",
+      "Not Visualized",
+      "Not Evaluated",
+      "Patent"
+    ],
+    "plaqueMorphology": [
+      "Homogeneous",
+      "Heterogeneous",
+      "Calcified"
+    ],
+    "direction": [
+      "Antegrade",
+      "Retrograde",
+      "Bidirectional"
+    ],
+    "waveformShape": [
+      "Triphasic",
+      "Biphasic",
+      "Monophasic"
     ]
   }
 }
