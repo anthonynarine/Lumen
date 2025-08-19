@@ -25,6 +25,7 @@ const Login = () => {
 	// Destructure login, logout functions and authentication state from the custom useAuth hook
 	const { login, logout, state } = useAuth();
 
+	// Log authentication state changes whenever state.isAuthenticated updates for testing
 	useEffect(() => {
 		console.log("Auth state changed:", state.isAuthenticated);
 	}, [state.isAuthenticated]);
