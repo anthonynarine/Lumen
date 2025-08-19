@@ -25,6 +25,10 @@ const Login = () => {
 	// Destructure login, logout functions and authentication state from the custom useAuth hook
 	const { login, logout, state } = useAuth();
 
+	useEffect(() => {
+		console.log("Auth state changed:", state.isAuthenticated);
+	}, [state.isAuthenticated]);
+
 	// Handles form submission: validates input with Yup, clears errors if valid, attempts login, and logs the response.
 	// If validation fails, sets form error messages for display.
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +38,6 @@ const Login = () => {
 			setErrors({});
 			const response = await login({ email, password });
 			console.log("Login response:", response);
-			console.log(state.isAuthenticated);
 		} catch (err) {
 			if (err instanceof ValidationError && err.inner) {
 				const formErrors: { email?: string; password?: string } = {};
