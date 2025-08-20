@@ -3,6 +3,7 @@ import { useState } from "react";
 import * as yup from "yup";
 import { ValidationError } from "yup";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Yup validation schema for the login form: ensures email is valid and required, and password is at least 6 characters and required.
 const schema = yup.object().shape({
@@ -22,6 +23,8 @@ const Login = () => {
 		password?: string;
 	}>({});
 
+	const navigate = useNavigate();
+
 	// Destructure login, logout functions and authentication state from the custom useAuth hook
 	const { login, logout, state } = useAuth();
 
@@ -39,6 +42,7 @@ const Login = () => {
 			setErrors({});
 			const response = await login({ email, password });
 			console.log("Login response:", response);
+			navigate("/dashboard");
 		} catch (err) {
 			if (err instanceof ValidationError && err.inner) {
 				const formErrors: { email?: string; password?: string } = {};
