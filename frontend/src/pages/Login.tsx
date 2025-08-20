@@ -2,7 +2,10 @@ import { useAuth } from "../auth/hooks/useAuth";
 import { useState } from "react";
 import * as yup from "yup";
 import { ValidationError } from "yup";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
+// Yup validation schema for the login form: ensures email is valid and required, and password is at least 6 characters and required.
 const schema = yup.object().shape({
 	email: yup.string().email("Invalid email").required("Email is required"),
 	password: yup
@@ -12,6 +15,7 @@ const schema = yup.object().shape({
 });
 
 const Login = () => {
+	// React state hooks for managing form input values and validation errors
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState<{
@@ -19,8 +23,18 @@ const Login = () => {
 		password?: string;
 	}>({});
 
-	const { login, logout } = useAuth();
+	const navigate = useNavigate();
 
+	// Destructure login, logout functions and authentication state from the custom useAuth hook
+	const { login, logout, state } = useAuth();
+
+	// Log authentication state changes whenever state.isAuthenticated updates for testing
+	useEffect(() => {
+		console.log("Auth state changed:", state.isAuthenticated);
+	}, [state.isAuthenticated]);
+
+	// Handles form submission: validates input with Yup, clears errors if valid, attempts login, and logs the response.
+	// If validation fails, sets form error messages for display.
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
@@ -28,6 +42,7 @@ const Login = () => {
 			setErrors({});
 			const response = await login({ email, password });
 			console.log("Login response:", response);
+			navigate("/dashboard");
 		} catch (err) {
 			if (err instanceof ValidationError && err.inner) {
 				const formErrors: { email?: string; password?: string } = {};
