@@ -6,6 +6,7 @@ import TestPage from "./pages/TestPage";
 import Dashboard from "./pages/Dashboard";
 import AppShell from "./layout/AppShell/AppShell";
 import { CarotidExamPage } from "./exams/carotid/pages/CarotidExamPage";
+import ProtectedRoute from "./auth/utils/ProtectedRoute";
 
 function App() {
 	return (
@@ -14,14 +15,19 @@ function App() {
 			<Route
 				path="*"
 				element={
-					<AppShell>
-						<Routes>
-							<Route path="/dashboard" element={<Dashboard />} />
-							<Route path="/carotid" element={<CarotidExamPage />} />
-							<Route path="/test" element={<TestPage />} />
-							<Route path="*" element={<Navigate to="/dashboard" replace />} />
-						</Routes>
-					</AppShell>
+					<ProtectedRoute>
+						<AppShell>
+							<Routes>
+								<Route path="/dashboard" element={<Dashboard />} />
+								<Route path="/carotid" element={<CarotidExamPage />} />
+								<Route path="/test" element={<TestPage />} />
+								<Route
+									path="*"
+									element={<Navigate to="/dashboard" replace />}
+								/>
+							</Routes>
+						</AppShell>
+					</ProtectedRoute>
 				}
 			/>
 		</Routes>
