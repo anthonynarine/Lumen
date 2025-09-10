@@ -76,7 +76,7 @@ export const useAuth = () => {
         setToken("refresh_token", refresh_token);
 
         logger.info("📡 Fetching user from /validate-session/...");
-        const { data: user }: { data: User } = await authApi.get("/validate-session/");
+        const { data: user } = await authApi.get("/whoami/", { withCredentials: true });
         logger.info("🙋‍♂️ User profile fetched:", user);
 
         dispatch({ type: "LOGIN_SUCCESS", payload: user });

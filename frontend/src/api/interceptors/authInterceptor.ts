@@ -1,133 +1,192 @@
-import React from "react";
-import type { AxiosInstance, AxiosError, AxiosRequestConfig } from "axios";
-import { getToken,setToken, clearTokens } from "../../auth/utils/storage";
+// src/api/interceptors/authInterceptor.ts
+import type {
+  AxiosInstance,
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+  AxiosRequestHeaders,
+} from "axios";
+import { getToken, setToken, clearTokens } from "../../auth/utils/storage";
 import { logger } from "../../utils/logger";
 
-
 /**
- * Interface for a successful response from the token refresh endpoint.
+ * Interface describing the expected shape of a refresh response
+ * from the backend when using the Bearer (dev) strategy.
  */
 interface RefreshResponse {
   access: string;
+  refresh?: string;
 }
 
 /**
- * Shared promise to prevent multiple concurrent token refresh requests.
- * This ensures that if many requests fail with 401 at once,
- * only one actual refresh request is sent to the backend.
+ * Shared flags and queues for coordinating refresh requests.
  */
-let refreshTokenPromise: Promise<{ data: RefreshResponse }> | null = null;
+let isRefreshing = false;
+let waiters: Array<(access?: string) => void> = [];
 
 /**
- * Injects authentication and token lifecycle management into an Axios instance.
- *
- * Core Responsibilities:
- * - Automatically attaching the access token to all requests.
- * - Detecting expired tokens (401) and refreshing them using the refresh token.
- * - Retrying the original request exactly once after refreshing the token.
- * - Clearing tokens and redirecting to login on refresh failure.
- *
- * This function can be applied to any Axios instance (e.g., `authApi`, `examApi`).
- *
- * @param {AxiosInstance} api - The Axios instance to enhance with auth behavior.
- *
- * @example
- * import axios from "axios";
- * import { authInterceptor } from "@/api/interceptors/authInterceptor";
- *
- * const examApi = axios.create({ baseURL: import.meta.env.VITE_API_URL });
- * authInterceptor(examApi);
- * export default examApi;
+ * Utility: determine if a URL is an authentication endpoint that
+ * should not trigger refresh logic (avoids recursion).
  */
-export function authInterceptor(api: AxiosInstance): void {
-  // ─────────────────────────────────────────────────────
-  // Request Interceptor
-  // Adds the access token to Authorization header before sending any request
-  // ─────────────────────────────────────────────────────
-  api.interceptors.request.use((config) => {
-    const token = getToken("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+const isAuthUrl = (url?: string) =>
+  !!url &&
+  (url.includes("/auth/login") ||
+    url.includes("/auth/token-refresh") ||
+    url.includes("/auth/me") ||
+    url.includes("/logout"));
+
+/**
+ * Extend Axios request config with a private `_retry` flag
+ * to prevent infinite loops on repeated 401s.
+ */
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+/**
+ * authInterceptor
+ * ----------------
+ * Attaches authentication lifecycle management to an Axios instance.
+ *
+ * Responsibilities:
+ * - DEV (Bearer strategy):
+ *   • Attach access token from localStorage to every request.
+ *   • On 401, attempt a single refresh using refresh token.
+ *   • Update stored tokens and retry original request after refresh.
+ *
+ * - PROD (Cookie strategy):
+ *   • Do NOT attach Authorization headers manually.
+ *   • Let the browser send HttpOnly cookies automatically.
+ *   • On 401, simply clear local state and route to login.
+ *
+ * Features:
+ * - Prevents multiple simultaneous refresh calls (queues requests).
+ * - Skips refresh logic for auth endpoints themselves.
+ * - Provides optional `onLogout` callback for graceful redirects.
+ *
+ * @param api   Axios instance to enhance (e.g., authApi, examApi).
+ * @param opts  Optional hooks (e.g., custom onLogout handler).
+ */
+export function authInterceptor(api: AxiosInstance, opts?: { onLogout?: () => void }) {
+  const isProd = import.meta.env.PROD;
+
+  // ──────────────────────────────────────────────
+  // REQUEST INTERCEPTOR
+  // ──────────────────────────────────────────────
+  api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    if (!isProd) {
+      // In DEV, attach Bearer token from storage.
+      const token = getToken("access_token");
+      if (token) {
+        const headers = (config.headers ?? {}) as AxiosRequestHeaders;
+        headers.Authorization = `Bearer ${token}`;
+        config.headers = headers;
+      }
     }
+    // In PROD, do nothing — rely on cookies.
     return config;
   });
 
-  // ─────────────────────────────────────────────────────
-  // Response Interceptor
-  // Handles:
-  //  - Successful token rotation if new tokens are returned
-  //  - Logout cleanup on `/logout`
-  //  - Automatic refresh and retry of original request if 401
-  // ─────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────
+  // RESPONSE INTERCEPTOR
+  // ──────────────────────────────────────────────
   api.interceptors.response.use(
-    (response) => {
-      const { access, refresh } = response.data || {};
+    (response: AxiosResponse) => {
+      if (!isProd) {
+        // In DEV: capture new tokens if backend rotates them.
+        const { access, refresh } = (response.data ?? {}) as Partial<RefreshResponse>;
+        if (access) {
+          setToken("access_token", access);
+          api.defaults.headers.common.Authorization = `Bearer ${access}`;
+        }
+        if (refresh) setToken("refresh_token", refresh);
+      }
 
-      // Store new tokens if returned by backend
-      if (access) setToken("access_token", access);
-      if (refresh) setToken("refresh_token", refresh);
-
-      // Clear tokens if hitting logout route
-      if (response.config.url?.includes("/logout")) {
+      // On logout endpoint, clear local tokens regardless of env.
+      if (response.config.url && response.config.url.includes("/logout")) {
         clearTokens();
       }
 
       return response;
     },
 
-    /**
-     * Handles expired access tokens by refreshing and retrying the original request.
-     * If refresh fails, logs out the user and redirects to login page.
-     *
-     * @param {AxiosError} error - The original error returned from Axios
-     * @returns {Promise<any>} - A retry of the original request, or rejection if failed
-     */
+    // ──────────────────────────────────────────────
+    // ERROR HANDLER
+    // ──────────────────────────────────────────────
     async (error: AxiosError) => {
-      const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+      const original = error.config as RetryConfig | undefined;
+      const status = error.response?.status;
 
-      // Attempt token refresh on first 401 only
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
+      // If no config, already retried, or hitting auth endpoints → bail out.
+      if (!original || original._retry || isAuthUrl(original.url)) {
+        return Promise.reject(error);
+      }
+
+      // PROD STRATEGY (HttpOnly cookies)
+      if (isProd) {
+        if (status === 401) {
+          clearTokens();
+          if (opts?.onLogout) opts.onLogout();
+          else window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+
+      // DEV STRATEGY (Bearer tokens)
+      if (status === 401) {
+        original._retry = true;
 
         const refreshToken = getToken("refresh_token");
         if (!refreshToken) {
           logger.warn("No refresh token available — forcing logout");
           clearTokens();
-          window.location.href = "/login";
+          if (opts?.onLogout) opts.onLogout();
+          else window.location.href = "/login";
           return Promise.reject(error);
         }
 
+        // Queue up requests while a refresh is happening.
+        if (isRefreshing) {
+          await new Promise<void>((resolve) => waiters.push(() => resolve()));
+          return api(original); // retry once refresh is done
+        }
+
+        isRefreshing = true;
         try {
-          // Only send one refresh request, even if multiple calls fail
-          if (!refreshTokenPromise) {
-            refreshTokenPromise = api.post("/auth/token-refresh/", {
-              refresh: refreshToken,
-            });
+          // Call refresh endpoint with stored refresh token.
+          const { data } = await api.post<RefreshResponse>("/auth/token-refresh/", {
+            refresh: refreshToken,
+          });
+
+          // Persist and apply new tokens.
+          if (data.access) {
+            setToken("access_token", data.access);
+            api.defaults.headers.common.Authorization = `Bearer ${data.access}`;
           }
+          if (data.refresh) setToken("refresh_token", data.refresh);
 
-          const { data } = await refreshTokenPromise;
-          refreshTokenPromise = null;
+          // Notify all queued waiters.
+          waiters.forEach((w) => w(data.access));
+          waiters = [];
 
-          // Store new access token
-          setToken("access_token", data.access);
+          // Ensure retried request has updated header.
+          const headers = (original.headers ?? {}) as AxiosRequestHeaders;
+          if (data.access) headers.Authorization = `Bearer ${data.access}`;
+          original.headers = headers;
 
-          // Retry the original failed request with new token
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${data.access}`,
-          };
-
-          return api(originalRequest);
-        } catch (err) {
-          refreshTokenPromise = null;
-          logger.error("Refresh failed — redirecting to login", err);
+          return api(original);
+        } catch (refreshErr) {
+          logger.error("Refresh failed — logging out", refreshErr);
           clearTokens();
-          window.location.href = "/login";
-          return Promise.reject(err);
+          waiters.forEach((w) => w());
+          waiters = [];
+          if (opts?.onLogout) opts.onLogout();
+          else window.location.href = "/login";
+          return Promise.reject(refreshErr);
+        } finally {
+          isRefreshing = false;
         }
       }
 
-      // If not 401 or already retried, propagate the error
+      // Other errors: pass through
       return Promise.reject(error);
     }
   );

@@ -15,7 +15,7 @@ function App() {
 			<Route
 				path="*"
 				element={
-					<ProtectedRoute>
+					// <ProtectedRoute>
 						<AppShell>
 							<Routes>
 								<Route path="/dashboard" element={<Dashboard />} />
@@ -27,7 +27,7 @@ function App() {
 								/>
 							</Routes>
 						</AppShell>
-					</ProtectedRoute>
+					// </ProtectedRoute>
 				}
 			/>
 		</Routes>
