@@ -26,6 +26,7 @@ import { authInterceptor } from "./interceptors/authInterceptor";
 const authApi = axios.create({
   baseURL: import.meta.env.VITE_AUTH_API_URL || "/auth", // Backend Auth API base URL
   withCredentials: true,                                 // Support cross-origin cookies
+  
 });
 
 // Attach token/refresh handling and 401 intercept logic

@@ -64,9 +64,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // ── PROD STRATEGY (HttpOnly cookies) ────────────────────────────────
           // NOTE: authApi was created with withCredentials: true,
           // so cookies are included automatically on every request.
-          const { data } = await authApi.get<User>("/whoami/", {
-            withCredentials: true,
-          });
+          const { data } = await authApi.get<User>("/whoami/");
+          console.log("🙋‍♂️ /whoami/ response:", data);
           if (cancelled) return;
           dispatch({ type: "RESTORE_SESSION", payload: data });
         } else {
@@ -79,9 +78,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             try {
               // Validate token and get canonical user from server
-              const { data: user } = await authApi.get<User>("/whoami/", {
-                withCredentials: true,
-              });
+              const { data: user } = await authApi.get<User>("/whoami/");
               if (cancelled) return;
 
               // Prefer server truth; also mirror for convenience
