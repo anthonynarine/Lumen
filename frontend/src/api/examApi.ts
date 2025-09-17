@@ -1,96 +1,107 @@
-// src/api/examApi.ts
-
-import { CreateExamPayload } from "../exams/carotid/types";
-
 /**
- * Axios instance configured for the main Exam API.
+ * 🩺 examApi (Lumen client)
+ * -------------------------
+ * Axios instance + helpers for talking to the Lumen backend (Django).
  *
- * This instance is used to communicate with the Django-based Lumen backend,
- * which handles all vascular exam types (e.g., carotid, renal, venous).
+ * Responsibilities
+ * - Sends authenticated requests to Lumen (all exam types).
+ * - Mounts the shared authInterceptor to seamlessly refresh on 401.
+ * - Exposes small helpers for common patterns (fetching templates, creating exams).
  *
- * ✅ Responsibilities:
- * - Authenticated requests using the user's access token
- * - Handles token refresh automatically via authInterceptor
- * - Supports multi-exam workflows (shared instance for all exam modules)
- * - Injects `Authorization` and `withCredentials` headers
+ * Environment
+ * - VITE_API_URL .......... Base URL for Lumen (should include "/api" if routes live there)
  *
- * Used by: carotidApi.ts, renalApi.ts, etc.
+ * Notes
+ * - Keep this client interceptor-enabled.
+ * - Do NOT attach the interceptor to authApi (that talks to the Auth microservice).
  */
 
 import axios from "axios";
 import { authInterceptor } from "./interceptors/authInterceptor";
 
-/**
- * Axios instance for interacting with the Lumen Exam API.
- * Automatically attaches JWT tokens and handles refresh logic.
- */
+// ─────────────────────────────────────────────────────────────
+// Axios instance for Lumen
+// ─────────────────────────────────────────────────────────────
 const examApi = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // Set in your frontend .env file
-  withCredentials: true,                 // Enable cross-origin cookies if needed
+  baseURL: import.meta.env.VITE_API_URL, // e.g. http://localhost:8000/api
+  withCredentials: true,                 // cookies for PROD flows (CSRF/session)
 });
 
-// Optional: log HTML responses mistakenly treated as JSON
+// Optional: make HTML mismatch obvious during dev
 examApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    const htmlFallback = typeof error?.response?.data === "string" &&
-                          error.response.data.startsWith("<!DOCTYPE");
+    const htmlFallback =
+      typeof error?.response?.data === "string" &&
+      error.response.data.startsWith("<!DOCTYPE");
     if (htmlFallback) {
+      // eslint-disable-next-line no-console
       console.error("❌ Received HTML instead of JSON:", error.response.data);
     }
     return Promise.reject(error);
   }
 );
 
-// Attach shared auth logic (access token, 401 retry, etc.)
+// Attach auth lifecycle (Bearer in DEV, cookie refresh in PROD)
 authInterceptor(examApi);
 
 export default examApi;
 
+// ─────────────────────────────────────────────────────────────
+// Typed helpers used across exam modules
+// ─────────────────────────────────────────────────────────────
+
+/** Canonical shape when Lumen returns a single exam object. */
+type ApiExamResponse<T> = { exam: T };
+/** Canonical shape when Lumen returns a template. */
+type TemplateResponse = { template: unknown };
 
 /**
- * Fetches the JSON-based segment template for a given exam type and site.
- * This is used to build the UI dynamically from backend JSON config.
+ * Fetch a JSON-based segment template for a given exam type and site.
+ * Primary path is `/reports/{exam}/template/`. A legacy fallback is attempted
+ * if your server still exposes `/templates/{exam}/`.
  *
- * @param examType - The exam slug (e.g. "carotid", "renal")
- * @param site - Optional site identifier (default: "mount_sinai_hospital")
- * @returns The template object (segment keys, labels, fields)
+ * @param examType The exam slug (e.g., "carotid", "renal")
+ * @param site Optional site identifier (default: "mount_sinai_hospital")
+ * @returns The template payload used to build the dynamic UI
  */
 export async function fetchExamTemplate(
   examType: string,
   site = "mount_sinai_hospital"
-): Promise<any> {
-  const URL = `/reports/${examType}/template/?site=${site}`;
-  const response = await examApi.get(URL);
+): Promise<TemplateResponse["template"]> {
+  const primaryURL = `/reports/${examType}/template/?site=${site}`;
 
-  console.log("📦 fetchExamTemplate:", response);
-
-  if (!response.data || !response.data.template) {
-    throw new Error(`Missing template for ${examType}`);
+  try {
+    const response = await examApi.get<TemplateResponse>(primaryURL);
+    if (!response.data?.template) throw new Error("Missing template");
+    return response.data.template;
+  } catch {
+    // 🔙 Legacy fallback (only used if your backend still serves old route)
+    const legacyURL = `/templates/${examType}/?site=${site}`;
+    const legacy = await examApi.get<TemplateResponse>(legacyURL);
+    if (!legacy.data?.template) {
+      throw new Error(`Missing template for ${examType}`);
+    }
+    return legacy.data.template;
   }
-
-  return response.data.template;
 }
 
 /**
- * Generic exam creation function for any vascular modality.
+ * Create a new exam for any modality (carotid, renal, venous, …).
  *
- * @param examType - The exam type slug (e.g. "carotid", "renal")
- * @param payload - Patient metadata and exam config
- * @returns Newly created exam object from backend
+ * @param examType The exam slug (e.g., "carotid")
+ * @param payload  Patient metadata and exam config
+ * @returns        The created exam object
  */
 export async function createExam<T = any>(
   examType: string,
-  payload: CreateExamPayload
+  payload: Record<string, unknown>
 ): Promise<T> {
   const URL = `/reports/${examType}/`;
-  const response = await examApi.post(URL, payload);
+  const response = await examApi.post<ApiExamResponse<T>>(URL, payload);
 
-  console.log("📝 createExam:", response);
-
-  if (!response.data || !response.data.exam) {
+  if (!response.data?.exam) {
     throw new Error(`Failed to create ${examType} exam`);
   }
-
   return response.data.exam;
 }

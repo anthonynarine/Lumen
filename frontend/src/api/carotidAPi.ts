@@ -1,4 +1,9 @@
-// src/api/carotidApi.ts
+/**
+ * 🫀 carotidApi
+ * -------------
+ * Thin, typed wrappers around the Lumen carotid endpoints.
+ * These functions delegate transport to `examApi` (which carries auth/refresh).
+ */
 
 import examApi from "../api/examApi";
 import { CreateExamPayload, Exam } from "../exams/carotid/types/sharedTypes";
@@ -6,114 +11,88 @@ import { SegmentUpdateResult } from "../exams/carotid/types/apiResponsetypes";
 import { fetchExamTemplate } from "./examApi";
 
 /**
- * Creates a new carotid exam record in the backend.
- * This includes patient info, scope, clinical indication, and site.
+ * Create a new carotid exam.
  *
- * @param payload - The form values used to create a carotid exam
- * @returns The newly created carotid Exam object
+ * @param payload Form values (patient info, scope, indication, site, etc.)
+ * @returns       Newly created carotid exam
  */
-export async function createCarotidExam( payload: CreateExamPayload): Promise<Exam> {
+export async function createCarotidExam(payload: CreateExamPayload): Promise<Exam> {
+  const URL = `/reports/carotid/`;
+  const response = await examApi.post<{ exam: Exam }>(URL, payload);
 
-    const URL = `/reports/carotid/`;
-    const response = await examApi.post(URL, payload);
-
-    console.log("📄 createCarotidExam response:", response);
-
-    if (!response.data || !response.data.exam) {
-        throw new Error("Failed to create carotid exam.");
-    }
-
-    return response.data.exam;
+  // Simple guard against unexpected shapes
+  if (!response.data || !response.data.exam) {
+    throw new Error("Failed to create carotid exam.");
+  }
+  return response.data.exam;
 }
 
 /**
- * Updates PSV/EDV measurement data for a carotid exam’s segments.
+ * Patch PSV/EDV measurement updates for one or more carotid segments.
+ * Only the specified fields are updated.
  *
- * This is typically called after the technologist enters or modifies velocity data.
- * Only the specified fields are patched — partial update.
- *
- * @param examId - Unique ID of the carotid exam
- * @param updates - Raw measurement updates grouped by segment key
- *   Example:
- *     {
- *       prox_ica_right: { psv: 300, edv: 100 },
- *       mid_cca_left: { psv: 150 }
- *     }
- *
- * @returns Confirmation message and count of segments updated
+ * @param examId  Carotid exam id
+ * @param updates Partial segment updates keyed by segment id
+ * @returns       Backend acknowledgement (count/message/etc.)
  */
 export async function updateCarotidSegments(
-    examId: number,
-    updates: Record<string, any> // Replace with a typed interface if desired
-    ): Promise<SegmentUpdateResult> {
+  examId: number,
+  updates: Record<string, unknown> // swap to a stricter type as your model stabilizes
+): Promise<SegmentUpdateResult> {
+  const URL = `/reports/carotid/${examId}/segments/`;
+  const response = await examApi.patch<SegmentUpdateResult>(URL, updates);
 
-    const URL = `/reports/carotid/${examId}/segments/`;
-    const response = await examApi.patch(URL, updates);
-
-    console.log("✏️ updateCarotidSegments response:", response);
-
-    if (!response.data) {
-        throw new Error("Failed to update carotid segments.");
-    }
-
-    return response.data;
+  if (!response.data) {
+    throw new Error("Failed to update carotid segments.");
+  }
+  return response.data;
 }
 
 /**
- * Triggers backend calculation logic for a carotid exam.
+ * Trigger the carotid calculator (ICA/CCA ratio, stenosis classification, etc.).
+ * Some backends respond 204 No Content; handle that gracefully.
  *
- * This computes ICA/CCA ratio, stenosis classification, and stores results on the exam record.
- * Typically called after all segment PSV/EDV data has been entered.
- *
- * @param examId - Unique ID of the carotid exam
- * @returns { result: string } - Confirmation from backend
+ * @param examId Carotid exam id
+ * @returns      A simple object confirming completion (or the server’s payload)
  */
-export async function calculateCarotidExam( examId: number): Promise<{ result: string }> {
+export async function calculateCarotidExam(
+  examId: number
+): Promise<{ result: string }> {
+  const URL = `/reports/carotid/${examId}/calculate/`;
+  const response = await examApi.post(URL);
 
-    const URL = `/reports/carotid/${examId}/calculate/`;
-    const response = await examApi.post(URL);
-
-    console.log("🧠 calculateCarotidExam response:", response);
-
-    if (!response.data) {
-        throw new Error("Failed to run carotid exam calculation.");
-    }
-
-    return response.data;
+  // Accept either 200 with JSON or 204 with no body
+  if (response.status === 204) {
+    return { result: "ok" };
+  }
+  if (!response.data) {
+    throw new Error("Failed to run carotid exam calculation.");
+  }
+  return response.data as { result: string };
 }
 
 /**
- * Retrieves the auto-generated clinical conclusion for a carotid exam.
+ * Fetch the auto-generated/improved clinical conclusion for a carotid exam.
  *
- * This conclusion is derived from PSV/EDV measurements, ICA/CCA ratios,
- * and backend criteria logic (e.g. Mount Sinai velocity thresholds).
- *
- * @param examId - Unique ID of the carotid exam
- * @returns The generated impression text
+ * @param examId Carotid exam id
+ * @returns      Impression text
  */
-export async function fetchCarotidConclusion( examId: number): Promise<string> {
+export async function fetchCarotidConclusion(examId: number): Promise<string> {
+  const URL = `/reports/carotid/${examId}/conclusion/`;
+  const response = await examApi.get<{ conclusion: string }>(URL);
 
-    const URL = `/reports/carotid/${examId}/conclusion/`;
-    const response = await examApi.get(URL);
-
-    console.log("📋 fetchCarotidConclusion response:", response);
-
-    if (!response.data || !response.data.conclusion) {
-        throw new Error("Failed to fetch carotid conclusion.");
-    }
-
-    return response.data.conclusion;
+  if (!response.data || !response.data.conclusion) {
+    throw new Error("Failed to fetch carotid conclusion.");
+  }
+  return response.data.conclusion;
 }
 
 /**
- * Fetches the carotid JSON-based template from the backend.
- * This template defines segments, field labels, and measurement types.
+ * Fetch the carotid template (segments, labels, field definitions).
+ * Delegates to the shared exam helper to keep endpoints centralized.
  *
- * Used to build the dynamic Formik UI structure.
- *
- * @param site - Optional site identifier (default: "mount_sinai_hospital")
- * @returns The full template object for carotid exams
+ * @param site Optional site code (defaults to Mount Sinai)
+ * @returns    Carotid template object
  */
 export const fetchCarotidTemplate = (site = "mount_sinai_hospital") =>
-    fetchExamTemplate("carotid", site);
-
+  fetchExamTemplate("carotid", site);

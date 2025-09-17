@@ -213,3 +213,6 @@ User redirected to /login
 - **Validation** → handled by Lumen’s `auth_integration` talking to Auth API.  
 - **Logout** → clears tokens (dev) or cookies (prod).  
 - **Interceptors** → handle token refresh in dev; prod just relies on cookies expiring.
+
+
+Maintained by Anthony Narine + Mitra Singh 🚀
