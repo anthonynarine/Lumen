@@ -1,24 +1,77 @@
-# 📚 Lumen Documentation Index
 
-Welcome to the Lumen developer docs. This folder contains technical documentation and architecture overviews for the Lumen vascular reporting system.
+Axios Setup in Your Project
+1. Two Axios instances
 
----
+authApi
 
-## 🔐 Authentication
+Base URL = VITE_AUTH_API_URL (Auth API, Heroku-hosted)
 
-* [Lumen Auth Flow](./lumen-auth-flow.md)
+Used for login, logout, token refresh, and whoami
 
-  > End-to-end walkthrough of the login flow, token handling, session management, and backend verification.
+❌ No interceptor attached (prevents infinite loops on refresh)
 
----
+Has refreshAccessToken() helper
 
-## 🧩 Coming Soon
+examApi
 
-* `permissions-model.md` – Breakdown of user roles and access levels
-* `api-endpoints.md` – List of core API routes
-* `deployment-checklist.md` – Steps to deploy and verify production readiness
-* `data-flow.md` – Full-stack data lifecycle from form input to HL7 export
+Base URL = VITE_API_URL (Lumen backend, Django)
 
----
+Used for carotid/renal/etc. exam endpoints
 
-> 📁 You can add more `.md` files to this folder to keep documentation clean, discoverable, and version-controlled.
+✅ Has authInterceptor attached
+
+2. Interceptor (authInterceptor)
+
+Attached only to examApi, it does:
+
+Request phase
+
+DEV (localStorage strategy):
+
+Reads access_token via getToken()
+
+Adds Authorization: Bearer <token> header
+
+PROD (cookie strategy):
+
+Doesn’t add Authorization header — relies on cookies
+
+Always adds withCredentials: true
+
+Response phase
+
+Captures rotated tokens in DEV (if backend returns access/refresh)
+
+Clears tokens on /logout
+
+Error handler (focus: 401 Unauthorized)
+
+Skips refresh for /login, /token-refresh/, /logout, /whoami (avoids loops)
+
+DEV:
+
+If 401, tries refresh by calling Auth API /token-refresh/ with { refresh }
+
+Stores new access/refresh tokens
+
+Retries the original request
+
+PROD:
+
+If 401, attempts refresh with cookies
+
+If refresh fails, clears state + logs out
+
+Uses a single-flight queue: concurrent requests wait while one refresh happens, then replay
+
+3. Carotid + Exam APIs
+
+All exam-related functions (fetchCarotidTemplate, createCarotidExam, etc.) call examApi
+
+This means they automatically get JWT injection + refresh handling
+
+They don’t directly touch authApi
+
+✅ So the overall flow is:
+Frontend calls → examApi → Lumen → Auth integration → Auth API /whoami/
+And if access token is expired, the interceptor silently refreshes with /token-refresh/.

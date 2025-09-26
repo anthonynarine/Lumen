@@ -25,7 +25,7 @@ export const CarotidExamPage = () => {
   useEffect(() => {
     const fetchTemplate = async () => {
       try {
-        const res = await examApi.get("/api/templates/carotid/?site=mount_sinai_hospital");
+        const res = await examApi.get("/templates/carotid/?site=mount_sinai_hospital");
 
         // Extract and transform segments
         const rawSegments = res.data.template.segments;
