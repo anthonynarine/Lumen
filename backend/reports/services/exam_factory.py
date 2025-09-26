@@ -6,11 +6,21 @@ from reports.models.measurements import Measurement
 
 logger = logging.getLogger(__name__)  # module-level logger
 
+
 def generate_placeholder_name(gender: str = "unspecified") -> str:
     """
-    Generates a placeholder patient name when none is provided.
+    Generate a placeholder patient name when none is provided.
 
-    Format: "John Doe #001", "Jane Doe #002", or "Patient #003"
+    Example outputs:
+        - "John Doe #001" (male)
+        - "Jane Doe #002" (female)
+        - "Patient #003" (unspecified/other)
+
+    Args:
+        gender (str): Reported gender, case-insensitive. Defaults to "unspecified".
+
+    Returns:
+        str: Generated placeholder name.
     """
     count = Exam.objects.count() + 1
     if gender.lower() == "male":
@@ -19,34 +29,50 @@ def generate_placeholder_name(gender: str = "unspecified") -> str:
         name = f"Jane Doe #{count:03}"
     else:
         name = f"Patient #{count:03}"
-    
+
     logger.warning(f"Generated placeholder name: {name} (gender={gender})")
     return name
 
 
 def create_exam_from_template(exam_type: str, site: str, patient_data: dict, created_by: str) -> Exam:
     """
-    Creates a full Exam instance (with segments + measurements) from a structured JSON template.
+    Create a full Exam instance (with segments + measurements) from a structured JSON template.
+
+    This function is the entry point for initializing new vascular exams
+    based on JSON templates stored under `templates/<exam_type>/<exam_type>.json`.
+
+    Workflow:
+        1. Load JSON template via registry.
+        2. Create an Exam record with patient + study metadata.
+        3. Iterate through all template segments, creating Segment + Measurement rows.
+        4. Initialize each measurement field (PSV, EDV, RI, etc.) to `None`.
+        5. Store any declared unit overrides in `measurement.additional_data`.
 
     Args:
-        exam_type: e.g., "carotid"
-        site: e.g., "mount_sinai_gp1c"
-        patient_data: dict with patient name, mrn, dob, etc.
-        created_by: username or technologist string
+        exam_type (str): Exam type identifier (e.g., "carotid", "renal").
+        site (str): Clinical site identifier (e.g., "mount_sinai_hospital").
+        patient_data (dict): Patient + exam metadata. Expected keys include:
+            - "name", "gender", "mrn", "dob", "accession",
+            - "scope", "extent", "cpt_code", "technique",
+            - "operative_history", "indication"
+        created_by (str): Identifier for the technologist creating the exam.
 
     Returns:
-        Exam: fully initialized with segments and measurements
+        Exam: Fully initialized Exam object with related Segment + Measurement objects.
+
+    Raises:
+        Exception: Any unhandled errors during template loading or exam creation.
     """
     try:
-        # Load JSON template from registry
+        # Step 1: Load JSON template
         template = get_template(exam_type, site)
         logger.info(f"Loaded template for exam_type={exam_type}, site={site}")
 
-        # Extract and clean inputs
+        # Step 2: Extract inputs and ensure patient name
         gender = patient_data.get("gender", "unspecified")
         patient_name = patient_data.get("name") or generate_placeholder_name(gender)
 
-        # Create base exam
+        # Step 3: Create base Exam
         exam = Exam.objects.create(
             patient_name=patient_name,
             gender=gender,
@@ -63,9 +89,12 @@ def create_exam_from_template(exam_type: str, site: str, patient_data: dict, cre
             created_by=created_by,
             status="draft"
         )
-        logger.info(f"Exam created: id={exam.id}, type={exam_type}, patient={patient_name}, created_by={created_by}")
+        logger.info(
+            f"Exam created: id={exam.id}, type={exam_type}, "
+            f"patient={patient_name}, created_by={created_by}"
+        )
 
-        # Create all segments and measurements
+        # Step 4: Create segments + measurements from template
         for seg in template["segments"]:
             segment = Segment.objects.create(
                 exam=exam,
@@ -76,15 +105,38 @@ def create_exam_from_template(exam_type: str, site: str, patient_data: dict, cre
             logger.debug(f"Segment created: id={segment.id}, name={segment.name}")
 
             measurement = Measurement.objects.create(segment=segment)
+
+            # Handle both compact ["psv", "edv"] and verbose [{"name": "psv"}] styles
             for m in seg.get("measurements", []):
-                field_name = m["name"].lower()
+                field_name = m if isinstance(m, str) else m.get("name")
+                if not field_name:
+                    continue
+
                 if hasattr(measurement, field_name):
                     setattr(measurement, field_name, None)  # initialize with blank value
+
+                # Store units if available (from top-level template or per-field)
+                units_map = template.get("units", {})  # global exam-level units override
+                field_unit = None
+
+                if isinstance(m, dict) and "unit" in m:
+                    # Verbose style provided its own unit
+                    field_unit = m["unit"]
+                elif field_name in units_map:
+                    # Compact style with units override block
+                    field_unit = units_map[field_name]
+
+                if field_unit:
+                    measurement.additional_data[f"{field_name}_unit"] = field_unit
+
             measurement.save()
             logger.debug(f"Measurement initialized for segment={segment.name}")
 
         return exam
 
     except Exception as e:
-        logger.exception(f"Failed to create exam from template: exam_type={exam_type}, site={site}, error={e}")
+        logger.exception(
+            f"Failed to create exam from template: "
+            f"exam_type={exam_type}, site={site}, error={e}"
+        )
         raise
