@@ -4,7 +4,7 @@
   "site": "mount_sinai_hospital",
   "title": "Bilateral Carotid Duplex Protocol",
   "segments": [
-    // ---------- RIGHT SIDE ----------
+
     { "id": "subclavian_origin_right", "label": "Subclavian Origin (Right)", "side": "right", "vessel": "subclavian", "position": "origin", "measurements": ["psv", "edv"], "supportsWaveform": true },
     { "id": "subclavian_prox_right",   "label": "Subclavian Prox (Right)",   "side": "right", "vessel": "subclavian", "position": "prox",   "measurements": ["psv", "edv"], "supportsWaveform": true },
     { "id": "subclavian_mid_right",    "label": "Subclavian Mid (Right)",    "side": "right", "vessel": "subclavian", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true },
@@ -27,7 +27,6 @@
     { "id": "va_mid_right",    "label": "Vertebral Mid (Right)",    "side": "right", "vessel": "vertebral", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
     { "id": "va_dist_right",   "label": "Vertebral Dist (Right)",   "side": "right", "vessel": "vertebral", "position": "dist",   "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
 
-    // ---------- LEFT SIDE ----------
     { "id": "subclavian_origin_left", "label": "Subclavian Origin (Left)", "side": "left", "vessel": "subclavian", "position": "origin", "measurements": ["psv", "edv"], "supportsWaveform": true },
     { "id": "subclavian_prox_left",   "label": "Subclavian Prox (Left)",   "side": "left", "vessel": "subclavian", "position": "prox",   "measurements": ["psv", "edv"], "supportsWaveform": true },
     { "id": "subclavian_mid_left",    "label": "Subclavian Mid (Left)",    "side": "left", "vessel": "subclavian", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true },
@@ -50,7 +49,7 @@
     { "id": "va_mid_left",    "label": "Vertebral Mid (Left)",    "side": "left", "vessel": "vertebral", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
     { "id": "va_dist_left",   "label": "Vertebral Distal (Left)", "side": "left", "vessel": "vertebral", "position": "dist",   "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
 
-    // ---------- TEMPORAL (Optional) ----------
+
     { "id": "superficial_temporal_right", "label": "Superficial Temporal (Right)", "side": "right", "vessel": "temporal", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsDirection": true },
     { "id": "superficial_temporal_left",  "label": "Superficial Temporal (Left)",  "side": "left",  "vessel": "temporal", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsDirection": true }
   ],

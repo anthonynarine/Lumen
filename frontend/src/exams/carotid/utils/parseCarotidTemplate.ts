@@ -1,19 +1,39 @@
+// src/exams/carotid/utils/parseCarotidTemplate.ts
+
 import { CarotidTemplate, SegmentDefinition } from "../types/carotidTemplateTypes";
 
 /**
- * Transforms flat segment list into a CarotidTemplate with right/left maps.
+ * buildCarotidTemplate
+ *
+ * Converts raw segment data from the backend JSON template into a
+ * strongly typed CarotidTemplate object for the frontend.
+ *
+ * Ensures that measurements, UI flags, and labels are preserved.
  */
-export function buildCarotidTemplate(segments: SegmentDefinition[]): CarotidTemplate {
-  const right: Record<string, SegmentDefinition> = {};
-  const left: Record<string, SegmentDefinition> = {};
+export function buildCarotidTemplate(rawSegments: any[]): CarotidTemplate {
+  const segments: SegmentDefinition[] = rawSegments.map((seg) => ({
+    id: seg.id,
+    label: seg.label,
+    side: seg.side,
+    vessel: seg.vessel,
+    position: seg.position,
 
-  for (const segment of segments) {
-    if (segment.side === "right") {
-      right[segment.id] = segment;
-    } else if (segment.side === "left") {
-      left[segment.id] = segment;
-    }
-  }
+    // Measurements array: may include ["psv", "edv"] or also "ica_cca_ratio"
+    measurements: seg.measurements,
 
-  return { right, left };
+    // UI flags
+    supportsPlaque: seg.supportsPlaque ?? false,
+    supportsStenosis: seg.supportsStenosis ?? false,
+    supportsWaveform: seg.supportsWaveform ?? false,
+    supportsDirection: seg.supportsDirection ?? false,
+    supportsFindings: seg.supportsFindings ?? false,
+  }));
+
+  return {
+    id: "carotid",
+    version: "1.0.0",
+    site: "mount_sinai_hospital",
+    title: "Bilateral Carotid Duplex Protocol",
+    segments,
+  };
 }

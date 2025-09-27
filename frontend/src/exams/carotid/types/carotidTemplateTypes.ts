@@ -1,85 +1,64 @@
-// ===============================
-// 🧠 Carotid Template Definitions
-// ===============================
-
-/** Optional enums to keep values consistent */
-export type CarotidSide = "right" | "left" | "temporal";
-export type Artery =
-  | "Subclavian"
-  | "CCA"
-  | "Bifurcation"
-  | "ICA"
-  | "ECA"
-  | "VA";
+// src/exams/carotid/types/carotidTemplateTypes.ts
 
 /**
- * Template-driven segment definition loaded from backend.
- * Used to render fields dynamically in carotid forms.
+ * SegmentDefinition
+ *
+ * Defines the metadata for each carotid segment as delivered
+ * by the backend JSON template. This drives the UI rendering.
  */
 export interface SegmentDefinition {
-  /** Unique key *per side* (e.g., "ica_prox") — side is kept separate below */
+  /** Unique identifier, e.g., "ica_prox_right". */
   id: string;
 
-  /** Human-readable label (e.g., "Proximal ICA") */
+  /** Display label, e.g., "ICA Prox (Right)". */
   label: string;
 
-  /** Artery name */
-  artery: Artery;
+  /** Anatomical side this segment belongs to. */
+  side: "left" | "right";
 
-  /** Laterality for Formik segmentation */
-  side: CarotidSide; // normally "right" | "left" for this form
+  /** Vessel type, e.g., "ica", "cca", "subclavian". */
+  vessel: string;
 
-  /** ---- UI capability flags (what columns to show for this segment) ---- */
-  supportsPlaque?: boolean;     // e.g., ICA, CCA, bifurcation
-  supportsStenosis?: boolean;   // typically ICA
-  supportsDirection?: boolean;  // vertebrals
-  supportsWaveform?: boolean;   // arterial segments
-  supportsFindings?: boolean;   // FMD, dissection, string of beads, etc.
+  /** Anatomical position within vessel (prox, mid, dist, origin, etc.). */
+  position?: string;
 
-  /** Optional group label (if you later group sections visually) */
-  displayGroup?: string;
+  /**
+   * Measurements supported by this segment.
+   * Always includes PSV, EDV. ICA segments may include "ica_cca_ratio".
+   */
+  measurements?: string[];
 
-  /** Explicit sort order to enforce anatomical flow in tables */
-  order?: number;
+  /** UI flags that control optional fields. */
+  supportsPlaque?: boolean;
+  supportsStenosis?: boolean;
+  supportsWaveform?: boolean;
+  supportsDirection?: boolean;
+  supportsFindings?: boolean;
 }
 
-/** Map of segment keys (e.g., "ica_prox") to definitions */
-export type SegmentDefinitionMap = {
-  [segmentKey: string]: SegmentDefinition;
-};
-
 /**
- * Full template structure returned by the backend for a carotid exam.
- * Includes both right and left segment definitions.
- * Keep maps for O(1) lookup, and provide an order array to render rows.
+ * CarotidTemplate
+ *
+ * Top-level structure for a carotid exam template.
+ * Contains all segment definitions plus dropdowns and unit metadata.
  */
 export interface CarotidTemplate {
-  right: SegmentDefinitionMap;
-  left: SegmentDefinitionMap;
+  id: string;
+  version: string;
+  site: string;
+  title: string;
 
-  /** Rendering order for each side (array of keys from the maps above) */
-  rightOrder: string[];
-  leftOrder: string[];
+  /** Flat list of all segments in this exam template. */
+  segments: SegmentDefinition[];
 
-  /** Optional display metadata for headers/sections */
+  /** Groupings for UI display (right, left, temporal). */
   display?: {
-    groups?: Array<{ key: string; title: string; order?: number }>;
+    groups: { title: string; segments: string[] }[];
   };
-}
 
-/**
- * Reduced segment template used in limited or legacy workflows.
- * Extended to allow future fields beyond PSV/EDV.
- */
-export type SegmentTemplate = {
-  label: string;
-  fields: (
-    | "psv"
-    | "edv"
-    | "stenosisPercent"
-    | "plaquePresent"
-    | "waveformShape"
-    | "direction"
-    | "diseaseFinding"
-  )[];
-};
+  /** Units override mapping (psv, edv, ica_cca_ratio). */
+  units?: Record<string, string>;
+
+  /** Dropdown options for stenosis, plaque morphology, etc. */
+  dropdowns?: Record<string, string[]>;
+}

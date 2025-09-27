@@ -53,9 +53,8 @@ This microservice powers a modular, document-aware AI assistant for the Lumen va
 
 🧑‍💻 Made with ❤️ by Anthony Narine.
 
-    Inspired by the Mount Sinai + Navix vascular team 
 
----
+
 
 
 
