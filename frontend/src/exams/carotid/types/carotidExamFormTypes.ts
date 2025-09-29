@@ -1,7 +1,7 @@
 // src/exams/carotid/types/carotidExamFormTypes.ts
 
 /**
- * Metadata about the exam itself, not tied to a specific segment.
+ * Metadata entered at the top of the carotid exam form
  */
 export interface CarotidMetadata {
   patientName: string;
@@ -9,52 +9,59 @@ export interface CarotidMetadata {
   accessionNumber: string;
   dateOfBirth: string;
   examDate: string;
-  referringMd?: string;
-  orderingMd?: string;
+  referringMd: string;
+  orderingMd: string;
   laterality: "bilateral" | "unilateral_right" | "unilateral_left" | "limited";
   icd10Codes: string[];
   cptCode: string;
 }
 
 /**
- * Measurements for a single segment.
- * PSV and EDV always exist, ICA/CCA ratio optional (ICA only).
- * Other optional values (stenosis, plaque, waveform, direction).
+ * SegmentMeasurements
+ *
+ * Represents the values entered for a single carotid segment row.
  */
 export interface SegmentMeasurements {
-  /** Peak systolic velocity (cm/s). */
+  /** Peak systolic velocity (cm/s) */
   psv?: number;
 
-  /** End diastolic velocity (cm/s). */
+  /** End diastolic velocity (cm/s) */
   edv?: number;
 
-  /** ICA/CCA ratio (only applies to ICA segments). */
+  /** ICA/CCA ratio (dimensionless, only for ICA segments) */
   ica_cca_ratio?: number;
 
-  /** Stenosis category selected from dropdown. */
+  /** % stenosis (selected from dropdown) */
   stenosisPercent?: string;
 
-  /** Whether plaque is present. */
+  /** Plaque present? */
   plaquePresent?: boolean;
 
-  /** Waveform morphology. */
+  /** Plaque morphology (Homogeneous, Heterogeneous, Calcified, etc.) */
+  plaqueMorphology?: string;
+
+  /** Waveform shape (Triphasic, Biphasic, Monophasic) */
   waveformShape?: string;
 
-  /** Flow direction (antegrade, retrograde). */
+  /** Flow direction (Antegrade, Retrograde, Bidirectional) */
   direction?: string;
 
-  /** Optional disease finding (FMD, dissection, etc.). */
+  /** Disease finding (FMD, Dissection, etc.) */
   diseaseFinding?: string;
 }
 
 /**
- * Map of segment ID → SegmentMeasurements.
- * Example: { ica_prox_right: { psv: 120, edv: 40, ica_cca_ratio: 2.0 } }
+ * SideMeasurements
+ *
+ * A map of segment IDs → SegmentMeasurements
+ * Example: { ica_prox: { psv: 120, edv: 40, ica_cca_ratio: 2.0 } }
  */
 export type SideMeasurements = Record<string, SegmentMeasurements>;
 
 /**
- * Full Formik values object for a carotid exam form.
+ * CarotidFormValues
+ *
+ * Full Formik shape for carotid exam form.
  */
 export interface CarotidFormValues {
   metadata: CarotidMetadata;

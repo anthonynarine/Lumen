@@ -7,52 +7,51 @@ import {
   CarotidFormValues,
   SideMeasurements,
 } from "../types/carotidExamFormTypes";
-import { SegmentDefinition } from "../types/carotidTemplateTypes";
+import { SegmentDefinition, CarotidTemplate } from "../types/carotidTemplateTypes";
 import { CarotidSegmentTable } from "./SegmentTable";
 
 /**
  * Props for SegmentTableFormik
  *
- * This component handles rendering one side of the carotid segment table.
- * It connects Formik context to the presentational table, passing:
- * - Side ("left" or "right")
- * - Segment definitions for that side
- * - Formik values for that side only
+ * Connects Formik context to a carotid segment table (left or right).
+ * Passes Formik values + setters into CarotidSegmentTable, along with
+ * segment definitions and dropdowns from the template.
  */
 export interface SegmentTableFormikProps {
   /** Which side to render: "left" or "right" */
   side: "left" | "right";
 
-  /** Segment definitions loaded from JSON template */
+  /** Segment definitions loaded from template JSON */
   segments: SegmentDefinition[];
+
+  /** Dropdowns loaded from template JSON */
+  dropdowns: CarotidTemplate["dropdowns"];
 }
 
 /**
  * SegmentTableFormik
  *
- * Bridges Formik context into the `CarotidSegmentTable` UI component.
- * It slices out `values.left` or `values.right` depending on `side`,
- * and ensures safe rendering even if segment definitions are missing.
- *
- * Example Formik structure:
- * {
- *   left: { ica_prox: { psv: 120, edv: 30 }, ... },
- *   right: { cca_mid: { psv: 130 }, ... },
- *   notes: "Limited views due to artifact"
- * }
+ * Bridges Formik state into the CarotidSegmentTable component:
+ * - Extracts side-specific values (values.left or values.right)
+ * - Passes Formik's setFieldValue to children for controlled updates
+ * - Ensures dropdowns are passed down so SegmentRow is template-driven
  */
 export const SegmentTableFormik: React.FC<SegmentTableFormikProps> = ({
   side,
   segments,
+  dropdowns,
 }) => {
   const { values, setFieldValue } = useFormikContext<CarotidFormValues>();
 
   // Defensive fallback: if values[side] is missing, use an empty object
   const sideValues: SideMeasurements = values?.[side] ?? {};
 
-  // If segments is undefined or not an array, show a helpful warning in dev
+  // Guard: if no valid segments provided, show a warning in dev
   if (!Array.isArray(segments)) {
-    console.warn(`❗ SegmentTableFormik received invalid segments for side: "${side}"`, segments);
+    console.warn(
+      `❗ SegmentTableFormik received invalid segments for side="${side}"`,
+      segments
+    );
     return (
       <p className="text-red-500">
         Unable to render segment table for <strong>{side}</strong>. Segment definitions missing.
@@ -63,9 +62,10 @@ export const SegmentTableFormik: React.FC<SegmentTableFormikProps> = ({
   return (
     <CarotidSegmentTable
       side={side}
-      segments={segments}
-      values={sideValues}            // 👈 Only this side's values from Formik
-      setFieldValue={setFieldValue}  // 👈 Allows SegmentRow to write to Formik via e.g. `left.ica_prox.psv`
+      segments={segments}        // Template-driven segment definitions
+      values={sideValues}        // Formik side-specific values
+      setFieldValue={setFieldValue} // Formik setter for controlled updates
+      dropdowns={dropdowns}      // 👈 Pass dropdowns from template JSON
     />
   );
 };

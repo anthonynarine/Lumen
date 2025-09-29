@@ -2,63 +2,50 @@
 
 import React from "react";
 import { Field } from "formik";
-
-import { SegmentDefinition } from "../types/carotidTemplateTypes";
+import { SegmentDefinition, CarotidTemplate } from "../types/carotidTemplateTypes";
 import { SideMeasurements } from "../types/carotidExamFormTypes";
 
 /**
- * Props required to render a single row in the Carotid Segment Table.
- * Each row corresponds to one anatomical vessel segment (e.g., "ICA Prox Right").
+ * SegmentRowProps
+ *
+ * Defines props required to render a single carotid segment row.
  */
 export interface SegmentRowProps {
-  /** The side this segment belongs to: "left" or "right". */
   side: "left" | "right";
-
-  /** Metadata definition of this segment (label, supported fields, etc.). */
   definition: SegmentDefinition;
-
-  /** Current Formik values for this side only (left or right). */
   values: SideMeasurements;
-
-  /**
-   * Formik setter to update a field value directly.
-   * Example: setFieldValue("right.ica_prox.psv", 134)
-   */
   setFieldValue: (field: string, value: number | string | boolean | undefined) => void;
+  dropdowns: CarotidTemplate["dropdowns"];
 }
-
-// Constants for dropdowns (should eventually come from template dropdowns)
-const STENOSIS_OPTIONS = ["0–19%", "20–49%", "50–69%", "70–99%", "Occluded"] as const;
-const WAVEFORM_OPTIONS = ["Triphasic", "Biphasic", "Monophasic"] as const;
-const DIRECTION_OPTIONS = ["Antegrade", "Retrograde"] as const;
-const DISEASE_FINDING_OPTIONS = ["FMD", "Dissection", "String of Beads"] as const;
 
 /**
  * SegmentRow
  *
- * Renders one row in the carotid segment table.
- * Always shows PSV and EDV input fields.
- * Conditionally renders ICA/CCA ratio, stenosis %, plaque, waveform, direction,
- * and other findings dropdowns depending on the template definition.
+ * Displays PSV, EDV, ICA/CCA ratio, stenosis %, plaque (present + morphology),
+ * waveform, direction, and disease-finding controls for one vascular segment.
+ *
+ * Styling:
+ * - Numeric inputs: right-aligned, compact, dark-mode aware
+ * - Dropdowns: consistent Tailwind classes across light/dark
+ * - Checkbox: styled with focus rings and dark-mode borders
  */
 export const SegmentRow: React.FC<SegmentRowProps> = ({
   side,
   definition,
   values,
   setFieldValue,
+  dropdowns,
 }) => {
   const { id, label } = definition;
-
-  // Base path for Formik field mapping, e.g., "left.ica_prox"
   const basePath = `${side}.${id}`;
-
-  // Current row values for this segment (may be undefined if not filled yet)
   const rowValues = values?.[id] ?? {};
 
   return (
-    <tr className="border-t border-border">
+    <>
       {/* Segment Label */}
-      <td className="p-2 font-medium">{label}</td>
+      <td className="p-2 font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+        {label}
+      </td>
 
       {/* PSV Input */}
       <td className="p-2">
@@ -70,8 +57,10 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
             const val = parseFloat(e.target.value);
             setFieldValue(`${basePath}.psv`, Number.isNaN(val) ? undefined : val);
           }}
-          placeholder="PSV"
-          className="w-full px-1 py-1 border rounded text-xs dark:bg-gray-800"
+          placeholder="—"
+          className="w-full px-2 py-1 border rounded text-xs text-right
+                     bg-white text-gray-900 border-gray-300
+                     dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
           inputMode="decimal"
         />
       </td>
@@ -86,13 +75,15 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
             const val = parseFloat(e.target.value);
             setFieldValue(`${basePath}.edv`, Number.isNaN(val) ? undefined : val);
           }}
-          placeholder="EDV"
-          className="w-full px-1 py-1 border rounded text-xs dark:bg-gray-800"
+          placeholder="—"
+          className="w-full px-2 py-1 border rounded text-xs text-right
+                     bg-white text-gray-900 border-gray-300
+                     dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
           inputMode="decimal"
         />
       </td>
 
-      {/* ICA/CCA Ratio Input (only for ICA rows where template specifies it) */}
+      {/* ICA/CCA Ratio Input */}
       <td className="p-2">
         {definition.measurements?.includes("ica_cca_ratio") && (
           <input
@@ -103,8 +94,10 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
               const val = parseFloat(e.target.value);
               setFieldValue(`${basePath}.ica_cca_ratio`, Number.isNaN(val) ? undefined : val);
             }}
-            placeholder="Ratio"
-            className="w-full px-1 py-1 border rounded text-xs dark:bg-gray-800"
+            placeholder="—"
+            className="w-full px-2 py-1 border rounded text-xs text-right
+                       bg-white text-gray-900 border-gray-300
+                       dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
             inputMode="decimal"
           />
         )}
@@ -117,10 +110,12 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
             as="select"
             name={`${basePath}.stenosisPercent`}
             aria-label={`${label} % Stenosis`}
-            className="w-full px-1 py-1 border rounded text-xs dark:bg-gray-800"
+            className="w-full px-2 py-1 text-xs rounded border
+                       bg-white text-gray-900 border-gray-300
+                       dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
           >
-            <option value="">--</option>
-            {STENOSIS_OPTIONS.map((opt) => (
+            <option value="">—</option>
+            {dropdowns.stenosisPercent.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
               </option>
@@ -129,14 +124,37 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
         )}
       </td>
 
-      {/* Plaque Checkbox */}
-      <td className="p-2 text-center">
+      {/* Plaque: Present + Morphology */}
+      <td className="p-2">
         {definition.supportsPlaque && (
-          <Field
-            type="checkbox"
-            name={`${basePath}.plaquePresent`}
-            aria-label={`${label} plaque present`}
-          />
+          <div className="flex items-center gap-2">
+            {/* Plaque Present Checkbox */}
+            <Field
+              type="checkbox"
+              name={`${basePath}.plaquePresent`}
+              aria-label={`${label} plaque present`}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded
+                         focus:ring-blue-500
+                         dark:bg-gray-800 dark:border-gray-600 dark:focus:ring-blue-400"
+            />
+
+            {/* Plaque Morphology Dropdown */}
+            <Field
+              as="select"
+              name={`${basePath}.plaqueMorphology`}
+              aria-label={`${label} plaque morphology`}
+              className="flex-1 px-2 py-1 text-xs rounded border
+                         bg-white text-gray-900 border-gray-300
+                         dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
+            >
+              <option value="">—</option>
+              {dropdowns.plaqueMorphology.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </Field>
+          </div>
         )}
       </td>
 
@@ -147,10 +165,12 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
             as="select"
             name={`${basePath}.waveformShape`}
             aria-label={`${label} waveform shape`}
-            className="w-full px-1 py-1 border rounded text-xs dark:bg-gray-800"
+            className="w-full px-2 py-1 text-xs rounded border
+                       bg-white text-gray-900 border-gray-300
+                       dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
           >
-            <option value="">--</option>
-            {WAVEFORM_OPTIONS.map((opt) => (
+            <option value="">—</option>
+            {dropdowns.waveformShape.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
               </option>
@@ -166,10 +186,12 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
             as="select"
             name={`${basePath}.direction`}
             aria-label={`${label} flow direction`}
-            className="w-full px-1 py-1 border rounded text-xs dark:bg-gray-800"
+            className="w-full px-2 py-1 text-xs rounded border
+                       bg-white text-gray-900 border-gray-300
+                       dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
           >
-            <option value="">--</option>
-            {DIRECTION_OPTIONS.map((opt) => (
+            <option value="">—</option>
+            {dropdowns.direction.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
               </option>
@@ -178,24 +200,24 @@ export const SegmentRow: React.FC<SegmentRowProps> = ({
         )}
       </td>
 
-      {/* Other / Disease Finding Dropdown */}
+      {/* Disease Finding Dropdown (optional, currently hardcoded) */}
       <td className="p-2">
         {definition.supportsFindings && (
           <Field
             as="select"
             name={`${basePath}.diseaseFinding`}
             aria-label={`${label} disease finding`}
-            className="w-full px-1 py-1 border rounded text-xs dark:bg-gray-800"
+            className="w-full px-2 py-1 text-xs rounded border
+                       bg-white text-gray-900 border-gray-300
+                       dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
           >
-            <option value="">--</option>
-            {DISEASE_FINDING_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
+            <option value="">—</option>
+            <option value="FMD">FMD</option>
+            <option value="Dissection">Dissection</option>
+            <option value="String of Beads">String of Beads</option>
           </Field>
         )}
       </td>
-    </tr>
+    </>
   );
 };

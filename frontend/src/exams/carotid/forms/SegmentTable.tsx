@@ -1,62 +1,42 @@
 // src/exams/carotid/forms/SegmentTable.tsx
 
 import React from "react";
-import { SegmentDefinition } from "../types/carotidTemplateTypes";
+import { SegmentDefinition, CarotidTemplate } from "../types/carotidTemplateTypes";
 import { SideMeasurements } from "../types/carotidExamFormTypes";
 import { SegmentRow } from "./SegmentRow";
 
 /**
  * SegmentTableProps
  *
- * Props for rendering the compact carotid segment table for a single side
- * (left or right). This is the presentational table wrapper that:
- * - Applies clinical/anatomical ordering to segments
- * - Renders sticky column headers for usability
- * - Maps Formik values into <SegmentRow /> children
+ * Renders the carotid segment table for one side ("left" or "right").
  */
 export interface SegmentTableProps {
-  /** Which side to render: "left" or "right". */
   side: "left" | "right";
-
-  /** Segment metadata definitions for this side, provided by the JSON template. */
   segments: SegmentDefinition[];
-
-  /** Current Formik values for this side only (e.g., { ica_prox: { psv: 120, edv: 40 } }). */
   values: SideMeasurements;
-
-  /**
-   * Formik setter for updating field values.
-   * Passed down to SegmentRow so fields can write to paths like:
-   *   "right.ica_prox.psv" or "left.va_origin.direction"
-   */
   setFieldValue: (
     field: string,
     value: number | string | boolean | undefined
   ) => void;
+  dropdowns: CarotidTemplate["dropdowns"];
 }
 
 /**
  * CarotidSegmentTable
  *
- * Clinical table view for one side of the carotid exam. Columns are fixed to
- * match the VascuPro/Lumen protocol:
- * - Segment name
- * - PSV, EDV, ICA/CCA Ratio
- * - Stenosis %, Plaque, Waveform, Direction, Other findings
- *
- * Rows are rendered with <SegmentRow /> bound to Formik values.
+ * Displays a styled carotid exam table:
+ * - Sticky headers
+ * - Zebra striping
+ * - Right-aligned numeric columns
+ * - Template-driven dropdowns
  */
 export const CarotidSegmentTable: React.FC<SegmentTableProps> = ({
   side,
   segments,
   values,
   setFieldValue,
+  dropdowns,
 }) => {
-  /**
-   * Clinical/anatomical display order.
-   * Segments not listed here fall to the end but retain stable order.
-   * This ensures technologists always enter data in a consistent workflow.
-   */
   const order = React.useMemo(
     () => [
       "subclavian_origin",
@@ -70,21 +50,19 @@ export const CarotidSegmentTable: React.FC<SegmentTableProps> = ({
       "ica_prox",
       "ica_mid",
       "ica_dist",
-      "eca",
+      "eca_prox",
       "va_origin",
       "va_prox",
       "va_mid",
       "va_dist",
-      "superficial_temporal", // optional temporal artery segments
     ],
     []
   );
 
-  /** Sort segments based on the clinical order above. */
   const sortedSegments = React.useMemo(() => {
     return [...segments].sort((a, b) => {
-      const ia = order.findIndex((prefix) => a.id.startsWith(prefix));
-      const ib = order.findIndex((prefix) => b.id.startsWith(prefix));
+      const ia = order.indexOf(a.id);
+      const ib = order.indexOf(b.id);
       if (ia === -1 && ib === -1) return 0;
       if (ia === -1) return 1;
       if (ib === -1) return -1;
@@ -93,33 +71,42 @@ export const CarotidSegmentTable: React.FC<SegmentTableProps> = ({
   }, [segments, order]);
 
   return (
-    <div className="overflow-x-auto border rounded-md shadow-sm">
-      <table className="w-full table-auto text-sm">
-        {/* Sticky header improves usability during long data entry sessions */}
-        <thead className="bg-secondary text-left text-xs uppercase font-semibold sticky top-0 z-10">
+    <div className="overflow-x-auto border rounded-lg shadow-sm">
+      <table className="w-full table-fixed text-sm border-collapse">
+        {/* Header */}
+        <thead className="bg-gray-100 dark:bg-gray-800 text-xs font-semibold sticky top-0 z-10 shadow-sm">
           <tr>
-            <th className="p-2">Segment</th>
-            <th className="p-2 w-20">PSV</th>
-            <th className="p-2 w-20">EDV</th>
-            {/* 🔑 New column for ICA/CCA Ratio */}
-            <th className="p-2 w-24">ICA/CCA Ratio</th>
-            <th className="p-2 w-24">% Stenosis</th>
-            <th className="p-2 w-16">Plaque</th>
-            <th className="p-2 w-24">Waveform</th>
-            <th className="p-2 w-24">Direction</th>
-            <th className="p-2 w-32">Other</th>
+            <th className="p-2 text-left">Segment</th>
+            <th className="p-2 w-20 text-right">PSV</th>
+            <th className="p-2 w-20 text-right">EDV</th>
+            <th className="p-2 w-24 text-right">ICA/CCA Ratio</th>
+            <th className="p-2 w-28 text-left">% Stenosis</th>
+            <th className="p-2 w-16 text-center">Plaque</th>
+            <th className="p-2 w-28 text-left">Waveform</th>
+            <th className="p-2 w-28 text-left">Direction</th>
+            <th className="p-2 w-32 text-left">Other</th>
           </tr>
         </thead>
 
-        <tbody>
-          {sortedSegments.map((definition) => (
-            <SegmentRow
+        {/* Body */}
+        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          {sortedSegments.map((definition, idx) => (
+            <tr
               key={`${side}_${definition.id}`}
-              side={side}
-              definition={definition}
-              values={values}              // side-specific values only
-              setFieldValue={setFieldValue} // writes to `${side}.${id}.*`
-            />
+              className={
+                idx % 2 === 0
+                  ? "bg-white dark:bg-gray-900"
+                  : "bg-gray-50 dark:bg-gray-800"
+              }
+            >
+              <SegmentRow
+                side={side}
+                definition={definition}
+                values={values}
+                setFieldValue={setFieldValue}
+                dropdowns={dropdowns}
+              />
+            </tr>
           ))}
         </tbody>
       </table>

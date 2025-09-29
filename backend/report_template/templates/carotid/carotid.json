@@ -1,70 +1,85 @@
 {
   "id": "carotid",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "site": "mount_sinai_hospital",
   "title": "Bilateral Carotid Duplex Protocol",
   "segments": [
 
-    { "id": "subclavian_origin_right", "label": "Subclavian Origin (Right)", "side": "right", "vessel": "subclavian", "position": "origin", "measurements": ["psv", "edv"], "supportsWaveform": true },
-    { "id": "subclavian_prox_right",   "label": "Subclavian Prox (Right)",   "side": "right", "vessel": "subclavian", "position": "prox",   "measurements": ["psv", "edv"], "supportsWaveform": true },
-    { "id": "subclavian_mid_right",    "label": "Subclavian Mid (Right)",    "side": "right", "vessel": "subclavian", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true },
-    { "id": "subclavian_dist_right",   "label": "Subclavian Dist (Right)",   "side": "right", "vessel": "subclavian", "position": "dist",   "measurements": ["psv", "edv"], "supportsWaveform": true },
+    {
+      "id": "innominate_right",
+      "label": "Innominate Artery (Right)",
+      "side": "right",
+      "vessel": "innominate",
+      "position": "origin",
+      "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"],
+      "supportsPlaque": true,
+      "supportsWaveform": true,
+      "supportsStenosis": true,
+      "supportsStent": true,
+      "supportsFindings": true
+    },
 
-    { "id": "cca_prox_right", "label": "CCA Prox (Right)", "side": "right", "vessel": "cca", "position": "prox", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
-    { "id": "cca_mid_right",  "label": "CCA Mid (Right)",  "side": "right", "vessel": "cca", "position": "mid",  "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
-    { "id": "cca_dist_right", "label": "CCA Dist (Right)", "side": "right", "vessel": "cca", "position": "dist", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
+    { "id": "subclavian_origin_right", "label": "Subclavian Origin (Right)", "side": "right", "vessel": "subclavian", "position": "origin", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "subclavian_prox_right",   "label": "Subclavian Prox (Right)",   "side": "right", "vessel": "subclavian", "position": "prox",   "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "bifurcation_right", "label": "Carotid Bifurcation (Right)", "side": "right", "vessel": "bifurcation", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
+    { "id": "cca_prox_right", "label": "CCA Prox (Right)", "side": "right", "vessel": "cca", "position": "prox", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "cca_mid_right",  "label": "CCA Mid (Right)",  "side": "right", "vessel": "cca", "position": "mid",  "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "cca_dist_right", "label": "CCA Dist (Right)", "side": "right", "vessel": "cca", "position": "dist", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "ica_prox_right", "label": "ICA Prox (Right)", "side": "right", "vessel": "ica", "position": "prox", "measurements": ["psv", "edv", "ica_cca_ratio"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true },
-    { "id": "ica_mid_right",  "label": "ICA Mid (Right)",  "side": "right", "vessel": "ica", "position": "mid",  "measurements": ["psv", "edv", "ica_cca_ratio"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true },
-    { "id": "ica_dist_right", "label": "ICA Dist (Right)", "side": "right", "vessel": "ica", "position": "dist", "measurements": ["psv", "edv", "ica_cca_ratio"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true },
+    { "id": "bifurcation_right", "label": "Carotid Bifurcation (Right)", "side": "right", "vessel": "bifurcation", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "eca_right", "label": "ECA (Right)", "side": "right", "vessel": "eca", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
+    { "id": "ica_prox_right", "label": "ICA Prox (Right)", "side": "right", "vessel": "ica", "position": "prox", "measurements": ["psv", "edv", "ica_cca_ratio", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "ica_mid_right",  "label": "ICA Mid (Right)",  "side": "right", "vessel": "ica", "position": "mid",  "measurements": ["psv", "edv", "ica_cca_ratio", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "ica_dist_right", "label": "ICA Dist (Right)", "side": "right", "vessel": "ica", "position": "dist", "measurements": ["psv", "edv", "ica_cca_ratio", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "va_origin_right", "label": "Vertebral Origin (Right)", "side": "right", "vessel": "vertebral", "position": "origin", "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
-    { "id": "va_prox_right",   "label": "Vertebral Prox (Right)",   "side": "right", "vessel": "vertebral", "position": "prox",   "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
-    { "id": "va_mid_right",    "label": "Vertebral Mid (Right)",    "side": "right", "vessel": "vertebral", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
-    { "id": "va_dist_right",   "label": "Vertebral Dist (Right)",   "side": "right", "vessel": "vertebral", "position": "dist",   "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
+    { "id": "eca_right", "label": "ECA (Right)", "side": "right", "vessel": "eca", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true },
 
-    { "id": "subclavian_origin_left", "label": "Subclavian Origin (Left)", "side": "left", "vessel": "subclavian", "position": "origin", "measurements": ["psv", "edv"], "supportsWaveform": true },
-    { "id": "subclavian_prox_left",   "label": "Subclavian Prox (Left)",   "side": "left", "vessel": "subclavian", "position": "prox",   "measurements": ["psv", "edv"], "supportsWaveform": true },
-    { "id": "subclavian_mid_left",    "label": "Subclavian Mid (Left)",    "side": "left", "vessel": "subclavian", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true },
-    { "id": "subclavian_dist_left",   "label": "Subclavian Dist (Left)",   "side": "left", "vessel": "subclavian", "position": "dist",   "measurements": ["psv", "edv"], "supportsWaveform": true },
+    { "id": "va_prox_right", "label": "Vertebral Prox (Right)", "side": "right", "vessel": "vertebral", "position": "prox", "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
+    { "id": "va_mid_right",  "label": "Vertebral Mid (Right)",  "side": "right", "vessel": "vertebral", "position": "mid",  "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
+    { "id": "va_dist_right", "label": "Vertebral Dist (Right)", "side": "right", "vessel": "vertebral", "position": "dist", "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
 
-    { "id": "cca_prox_left", "label": "CCA Prox (Left)", "side": "left", "vessel": "cca", "position": "prox", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
-    { "id": "cca_mid_left",  "label": "CCA Mid (Left)",  "side": "left", "vessel": "cca", "position": "mid",  "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
-    { "id": "cca_dist_left", "label": "CCA Dist (Left)", "side": "left", "vessel": "cca", "position": "dist", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
+    { "id": "subclavian_origin_left", "label": "Subclavian Origin (Left)", "side": "left", "vessel": "subclavian", "position": "origin", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "subclavian_prox_left",   "label": "Subclavian Prox (Left)",   "side": "left", "vessel": "subclavian", "position": "prox",   "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "bifurcation_left", "label": "Carotid Bifurcation (Left)", "side": "left", "vessel": "bifurcation", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
+    { "id": "cca_prox_left", "label": "CCA Prox (Left)", "side": "left", "vessel": "cca", "position": "prox", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "cca_mid_left",  "label": "CCA Mid (Left)",  "side": "left", "vessel": "cca", "position": "mid",  "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "cca_dist_left", "label": "CCA Dist (Left)", "side": "left", "vessel": "cca", "position": "dist", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "ica_prox_left", "label": "ICA Prox (Left)", "side": "left", "vessel": "ica", "position": "prox", "measurements": ["psv", "edv", "ica_cca_ratio"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true },
-    { "id": "ica_mid_left",  "label": "ICA Mid (Left)",  "side": "left", "vessel": "ica", "position": "mid",  "measurements": ["psv", "edv", "ica_cca_ratio"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true },
-    { "id": "ica_dist_left", "label": "ICA Dist (Left)", "side": "left", "vessel": "ica", "position": "dist", "measurements": ["psv", "edv", "ica_cca_ratio"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true },
+    { "id": "bifurcation_left", "label": "Carotid Bifurcation (Left)", "side": "left", "vessel": "bifurcation", "measurements": ["psv", "edv", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "eca_left", "label": "ECA (Left)", "side": "left", "vessel": "eca", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true },
+    { "id": "ica_prox_left", "label": "ICA Prox (Left)", "side": "left", "vessel": "ica", "position": "prox", "measurements": ["psv", "edv", "ica_cca_ratio", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "ica_mid_left",  "label": "ICA Mid (Left)",  "side": "left", "vessel": "ica", "position": "mid",  "measurements": ["psv", "edv", "ica_cca_ratio", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
+    { "id": "ica_dist_left", "label": "ICA Dist (Left)", "side": "left", "vessel": "ica", "position": "dist", "measurements": ["psv", "edv", "ica_cca_ratio", "artery_diameter", "ap_tr", "longitudinal"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true, "supportsFindings": true },
 
-    { "id": "va_origin_left", "label": "Vertebral Origin (Left)", "side": "left", "vessel": "vertebral", "position": "origin", "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
-    { "id": "va_prox_left",   "label": "Vertebral Prox (Left)",   "side": "left", "vessel": "vertebral", "position": "prox",   "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
-    { "id": "va_mid_left",    "label": "Vertebral Mid (Left)",    "side": "left", "vessel": "vertebral", "position": "mid",    "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
-    { "id": "va_dist_left",   "label": "Vertebral Distal (Left)", "side": "left", "vessel": "vertebral", "position": "dist",   "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
+    { "id": "eca_left", "label": "ECA (Left)", "side": "left", "vessel": "eca", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsStenosis": true, "supportsStent": true },
 
+    { "id": "va_prox_left", "label": "Vertebral Prox (Left)", "side": "left", "vessel": "vertebral", "position": "prox", "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
+    { "id": "va_mid_left",  "label": "Vertebral Mid (Left)",  "side": "left", "vessel": "vertebral", "position": "mid",  "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
+    { "id": "va_dist_left", "label": "Vertebral Dist (Left)", "side": "left", "vessel": "vertebral", "position": "dist", "measurements": ["psv", "edv"], "supportsWaveform": true, "supportsDirection": true },
 
-    { "id": "superficial_temporal_right", "label": "Superficial Temporal (Right)", "side": "right", "vessel": "temporal", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsDirection": true },
-    { "id": "superficial_temporal_left",  "label": "Superficial Temporal (Left)",  "side": "left",  "vessel": "temporal", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsDirection": true }
+    { "id": "superficial_temporal_right", "label": "Superficial Temporal (Right)", "side": "right", "vessel": "temporal", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsDirection": true, "supportsFindings": true },
+    { "id": "superficial_temporal_left",  "label": "Superficial Temporal (Left)",  "side": "left",  "vessel": "temporal", "measurements": ["psv", "edv"], "supportsPlaque": true, "supportsWaveform": true, "supportsDirection": true, "supportsFindings": true }
   ],
   "display": {
     "groups": [
-      { "title": "Right Side", "segments": ["subclavian_origin_right","subclavian_prox_right","subclavian_mid_right","subclavian_dist_right","cca_prox_right","cca_mid_right","cca_dist_right","bifurcation_right","ica_prox_right","ica_mid_right","ica_dist_right","eca_right","va_origin_right","va_prox_right","va_mid_right","va_dist_right"] },
-      { "title": "Left Side",  "segments": ["subclavian_origin_left","subclavian_prox_left","subclavian_mid_left","subclavian_dist_left","cca_prox_left","cca_mid_left","cca_dist_left","bifurcation_left","ica_prox_left","ica_mid_left","ica_dist_left","eca_left","va_origin_left","va_prox_left","va_mid_left","va_dist_left"] },
+      { "title": "Right Side", "segments": ["innominate_right","subclavian_origin_right","subclavian_prox_right","cca_prox_right","cca_mid_right","cca_dist_right","bifurcation_right","ica_prox_right","ica_mid_right","ica_dist_right","eca_right","va_prox_right","va_mid_right","va_dist_right"] },
+      { "title": "Left Side", "segments": ["subclavian_origin_left","subclavian_prox_left","cca_prox_left","cca_mid_left","cca_dist_left","bifurcation_left","ica_prox_left","ica_mid_left","ica_dist_left","eca_left","va_prox_left","va_mid_left","va_dist_left"] },
       { "title": "Temporal Arteries", "segments": ["superficial_temporal_right","superficial_temporal_left"] }
     ]
   },
-  "units": { "psv": "cm/s", "edv": "cm/s", "ica_cca_ratio": "ratio" },
+  "units": {
+    "psv": "cm/s",
+    "edv": "cm/s",
+    "ica_cca_ratio": "ratio",
+    "artery_diameter": "cm",
+    "ap_tr": "cm",
+    "longitudinal": "cm"
+  },
   "dropdowns": {
     "stenosisPercent": ["0–19%","20–49%","50–69%","70–99%","Occluded","Not Visualized","Not Evaluated"],
-    "plaqueMorphology": ["Homogeneous","Heterogeneous","Calcified"],
-    "direction": ["Antegrade","Retrograde","Bidirectional"],
-    "waveformShape": ["Triphasic","Biphasic","Monophasic"]
+    "plaqueMorphology": ["Normal","Homogeneous","Heterogeneous","Calcified"],
+    "direction": ["Antegrade","Retrograde","Bidirectional","Not Visualized","Not Evaluated"],
+    "waveformShape": ["Triphasic","Biphasic","Monophasic","Absent","Not Visualized","Not Evaluated"],
+    "diseaseFinding": ["None","FMD","Dissection","String of Beads","Other","Not Evaluated"]
   }
 }
