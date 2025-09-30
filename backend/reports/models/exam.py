@@ -11,7 +11,7 @@ class Exam(models.Model):
         - Exam classification (carotid, renal, etc.)
         - Exam scope/extent (bilateral, limited, etc.)
         - CPT code (auto-filled based on scope/extent)
-        - Clinical context (indication, operative history, technique)
+        - Clinical context (indication, operative history, technique, history)
         - Gender, source, and AI-related metadata
 
     An Exam is the parent object for all associated Segment and Measurement data.
@@ -26,6 +26,9 @@ class Exam(models.Model):
         ✅ HL7 ORU message (to Mirth → EMR)
     """
 
+    # -------------------------------
+    # Choice fields
+    # -------------------------------
     EXAM_TYPES = [
         ("carotid", "Carotid"),
         ("renal", "Renal"),
@@ -58,7 +61,9 @@ class Exam(models.Model):
         ("other", "Other / Prefer to self-describe"),
     ]
 
-    # 🔹 Patient Metadata
+    # -------------------------------
+    # Patient metadata
+    # -------------------------------
     patient_name = models.CharField(max_length=255)
     gender = models.CharField(
         max_length=16,
@@ -71,7 +76,9 @@ class Exam(models.Model):
     accession = models.CharField(max_length=64, blank=True)
     exam_date = models.DateField(null=True, blank=True)
 
-    # 🔹 Exam Classification
+    # -------------------------------
+    # Exam classification
+    # -------------------------------
     exam_type = models.CharField(
         max_length=64,
         choices=EXAM_TYPES,
@@ -94,7 +101,9 @@ class Exam(models.Model):
         help_text="CPT code derived from exam_type + scope/extent."
     )
 
-    # 🔹 Clinical Context
+    # -------------------------------
+    # Clinical context
+    # -------------------------------
     technique = models.TextField(
         blank=True,
         help_text="Free-text description of imaging technique used."
@@ -109,7 +118,19 @@ class Exam(models.Model):
         help_text="ICD-10 code for indication (e.g., I73.9)."
     )
 
-    # 🔹 User Roles and Workflow
+    history = models.JSONField(
+        default=list,
+        blank=True,
+        help_text=(
+            "Array of patient surgical/procedural history entries. "
+            "Each entry is expected to follow the schema: "
+            "{ description: str, side: str (left|right|bilateral), date: str (ISO) }."
+        ),
+    )
+
+    # -------------------------------
+    # User roles and workflow
+    # -------------------------------
     created_by = models.CharField(
         max_length=128,
         help_text="Technologist who performed the study. Can later become FK to user."
@@ -133,7 +154,9 @@ class Exam(models.Model):
         help_text="Origin of exam data (manual, EPIC, DICOM, etc.)"
     )
 
-    # 🔹 Audit Trail
+    # -------------------------------
+    # Audit trail
+    # -------------------------------
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     signed_by_tech = models.BooleanField(default=False)
@@ -146,3 +169,4 @@ class Exam(models.Model):
         verbose_name = "Exam"
         verbose_name_plural = "Exams"
         ordering = ["-created_at"]
+
