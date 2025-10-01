@@ -7,12 +7,19 @@ import {
  * templateNormalizer
  *
  * Converts CarotidTemplate into structured arrays for rendering.
- * Uses `display.groups` from backend JSON to maintain anatomical order.
+ * Dynamically builds groups from `display.groups` in backend JSON.
+ *
+ * Example return:
+ * {
+ *   groups: [
+ *     { title: "Right Side", segments: [ ... ] },
+ *     { title: "Left Side", segments: [ ... ] },
+ *     { title: "Temporal Arteries", segments: [ ... ] }
+ *   ]
+ * }
  */
 export function templateNormalizer(tpl: CarotidTemplate): {
-  right: SegmentDefinition[];
-  left: SegmentDefinition[];
-  temporal: SegmentDefinition[];
+  groups: { title: string; segments: SegmentDefinition[] }[];
 } {
   // Build a lookup map: segmentId -> SegmentDefinition
   const segmentMap: Record<string, SegmentDefinition> = {};
@@ -20,26 +27,14 @@ export function templateNormalizer(tpl: CarotidTemplate): {
     segmentMap[seg.id] = seg;
   });
 
-  // Helper: resolve group ids into definitions
-  const resolveGroup = (ids: string[]): SegmentDefinition[] =>
-    ids
-      .map((id) => segmentMap[id])
-      .filter((seg): seg is SegmentDefinition => Boolean(seg));
+  // Resolve each group dynamically
+  const groups =
+    tpl.display?.groups.map((g) => ({
+      title: g.title,
+      segments: g.segments
+        .map((id) => segmentMap[id])
+        .filter((seg): seg is SegmentDefinition => Boolean(seg)),
+    })) ?? [];
 
-  // Pull groups by title
-  const rightGroup = tpl.display?.groups.find((g) =>
-    g.title.toLowerCase().includes("right")
-  );
-  const leftGroup = tpl.display?.groups.find((g) =>
-    g.title.toLowerCase().includes("left")
-  );
-  const temporalGroup = tpl.display?.groups.find((g) =>
-    g.title.toLowerCase().includes("temporal")
-  );
-
-  return {
-    right: rightGroup ? resolveGroup(rightGroup.segments) : [],
-    left: leftGroup ? resolveGroup(leftGroup.segments) : [],
-    temporal: temporalGroup ? resolveGroup(temporalGroup.segments) : [],
-  };
+  return { groups };
 }

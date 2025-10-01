@@ -22,13 +22,13 @@ interface Props {
  *
  * Renders a full carotid exam entry form:
  * - Patient metadata (MRN, accession, DOB, etc.)
- * - Right + Left carotid segment tables
+ * - Dynamic segment groups (Right / Left / Temporal, etc. from JSON template)
  * - Notes + future history section
  *
  * Uses a card-based layout for modern styling and readability.
  */
 export const CarotidExamForm: React.FC<Props> = ({ template, user }) => {
-  // Normalize template into arrays for Formik
+  // Normalize template into groups dynamically
   const norm = React.useMemo(() => templateNormalizer(template), [template]);
 
   // Initial Formik values
@@ -47,6 +47,7 @@ export const CarotidExamForm: React.FC<Props> = ({ template, user }) => {
     },
     left: {},
     right: {},
+    temporal: {},
     notes: "",
   };
 
@@ -149,25 +150,21 @@ export const CarotidExamForm: React.FC<Props> = ({ template, user }) => {
             </div>
           </div>
 
-          {/* Right Side */}
-          <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow">
-            <h2 className="text-lg font-semibold mb-4">➡️ Right Carotid</h2>
-            <SegmentTableFormik
-              side="right"
-              segments={norm.right}
-              dropdowns={template.dropdowns}
-            />
-          </div>
-
-          {/* Left Side */}
-          <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow">
-            <h2 className="text-lg font-semibold mb-4">⬅️ Left Carotid</h2>
-            <SegmentTableFormik
-              side="left"
-              segments={norm.left}
-              dropdowns={template.dropdowns}
-            />
-          </div>
+          {/* Dynamic Segment Groups from template */}
+          {norm.groups.map((group) => (
+            <div
+              key={group.title}
+              className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow"
+            >
+              <h2 className="text-lg font-semibold mb-4">{group.title}</h2>
+              <SegmentTableFormik
+                // Infer side from first segment in group if present
+                side={(group.segments[0]?.side as "left" | "right") ?? "right"}
+                segments={group.segments}
+                dropdowns={template.dropdowns}
+              />
+            </div>
+          ))}
 
           {/* Notes */}
           <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow">
@@ -204,3 +201,4 @@ export const CarotidExamForm: React.FC<Props> = ({ template, user }) => {
     </Formik>
   );
 };
+
