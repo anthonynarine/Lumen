@@ -38,15 +38,14 @@ def create_exam_from_template(exam_type: str, site: str, patient_data: dict, cre
     """
     Create a full Exam instance (with segments + measurements) from a structured JSON template.
 
-    This function is the entry point for initializing new vascular exams
-    based on JSON templates stored under `templates/<exam_type>/<exam_type>.json`.
-
     Workflow:
         1. Load JSON template via registry.
         2. Create an Exam record with patient + study metadata.
         3. Iterate through all template segments, creating Segment + Measurement rows.
-        4. Initialize each measurement field (PSV, EDV, RI, etc.) to `None`.
+        4. Initialize each measurement field (PSV, EDV, ICA/CCA ratio, etc.) to `None`.
         5. Store any declared unit overrides in `measurement.additional_data`.
+        6. For non-core measurements (e.g. artery_diameter, ap_tr), initialize
+           them in `measurement.additional_data` as well.
 
     Args:
         exam_type (str): Exam type identifier (e.g., "carotid", "renal").
@@ -106,16 +105,21 @@ def create_exam_from_template(exam_type: str, site: str, patient_data: dict, cre
 
             measurement = Measurement.objects.create(segment=segment)
 
-            # Handle both compact ["psv", "edv"] and verbose [{"name": "psv"}] styles
+            # Step 5: Initialize measurement fields
             for m in seg.get("measurements", []):
+                # Handle both compact ["psv", "edv"] and verbose [{"name": "psv"}] styles
                 field_name = m if isinstance(m, str) else m.get("name")
                 if not field_name:
                     continue
 
                 if hasattr(measurement, field_name):
-                    setattr(measurement, field_name, None)  # initialize with blank value
+                    # Core fields: initialize on the model directly
+                    setattr(measurement, field_name, None)
+                else:
+                    # Non-core fields: initialize in additional_data
+                    measurement.additional_data[field_name] = None
 
-                # Store units if available (from top-level template or per-field)
+                # Step 6: Store units if available (from template or field-level)
                 units_map = template.get("units", {})  # global exam-level units override
                 field_unit = None
 
