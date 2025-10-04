@@ -12,7 +12,7 @@ This module defines API endpoints for carotid ultrasound workflows, including:
 These endpoints orchestrate interaction between the frontend and the calculator/serializer layer.
 """
 
-import imp
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
