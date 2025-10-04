@@ -12,6 +12,7 @@ This module defines API endpoints for carotid ultrasound workflows, including:
 These endpoints orchestrate interaction between the frontend and the calculator/serializer layer.
 """
 
+import imp
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -20,7 +21,8 @@ from django.shortcuts import get_object_or_404
 
 from report_template.registry.template_registry import get_template
 from reports.models import Exam
-from reports.serializers.carotid_serializer import CarotidExamSerializer
+
+from reports.serializers.carotid import CarotidExamSerializer
 from reports.calculators.carotid_calculator import run_carotid_calculator
 from reports.services.conclusion_generator import generate_conclusion
 from reports.types.segments.carotid_segments import build_segment_dict
