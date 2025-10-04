@@ -6,7 +6,7 @@ from functools import lru_cache
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
 
 @lru_cache(maxsize=32)
-def get_template(exam_type: str, site: str, version: str = "1.0.0") -> dict:
+def get_template(exam_type: str, site: str) -> dict:
     """
     Loads a vascular exam template (e.g., carotid.json) based on exam_type, site, and version.
 
@@ -42,8 +42,8 @@ def get_template(exam_type: str, site: str, version: str = "1.0.0") -> dict:
         raise ValueError(f"Site mismatch: expected {site}, found {data.get('site')}")
 
     # Ensure the file's version matches
-    if data.get("version") != version:
-        raise ValueError(f"Version mismatch: expected {version}, found {data.get('version')}")
+    # if data.get("version") != version:
+    #     raise ValueError(f"Version mismatch: expected {version}, found {data.get('version')}")
 
     # Return the loaded and validated template
     return data

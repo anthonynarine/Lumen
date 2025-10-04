@@ -4,51 +4,39 @@ import json
 import logging
 from pathlib import Path
 
-# Step 1: Set up logger
 logger = logging.getLogger(__name__)
 
-# Step 2: Set the root directory for all site folders
-BASE_DIR = Path(__file__).resolve().parent
+# Point to centralized template folder in report_template/templates
+BASE_DIR = Path(__file__).resolve().parents[2] / "report_template" / "templates"
 
 
-def load_carotid_criteria(site: str) -> dict:
+def load_carotid_criteria(site: str = None) -> dict:
     """
-    Load site-specific carotid criteria from a structured JSON file.
+    Load carotid criteria JSON from the centralized templates folder.
 
-    Each site should have a file located at:
-        reports/site/<site>/criteria/carotid.json
+    All criteria files live under:
+        report_template/templates/<exam_type>/<exam_type>.json
 
-    Example folder structure:
-        reports/
-            site/
-                mountsinai/
-                    criteria/
-                        carotid.json
+    Example:
+        report_template/templates/carotid/carotid.json
 
     Args:
-        site (str): The name of the site (e.g., "mountsinai", "cedars", "nyu").
-                    Can include spaces or underscores (e.g., "Mount Sinai").
+        site (str, optional): Currently unused. Included for compatibility
+                            with previous interface.
 
     Returns:
         dict: Parsed JSON containing stenosis thresholds and vertebral rules.
 
     Raises:
-        FileNotFoundError: If the carotid.json file is not found for the given site.
-        json.JSONDecodeError: If the file is present but contains invalid JSON.
+        FileNotFoundError: If carotid.json is not found.
+        json.JSONDecodeError: If the file is present but invalid.
     """
+    path = BASE_DIR / "carotid" / "carotid.json"
 
-    # Step 3: Normalize site name to match folder convention
-    normalized = site.lower().replace(" ", "").replace("_", "")
-
-    # Step 4: Construct full path to the carotid criteria JSON file
-    path = BASE_DIR / normalized / "criteria" / "carotid.json"
-
-    # Step 5: Debug log for visibility
     logger.debug(f"📁 Resolved carotid criteria path: {path}")
 
-    # Step 6: Validate and load
     if not path.exists():
-        raise FileNotFoundError(f"Carotid criteria not found for site '{site}' at path: {path}")
+        raise FileNotFoundError(f"Carotid criteria not found at path: {path}")
 
     with open(path, "r") as f:
         return json.load(f)

@@ -34,23 +34,30 @@ def build_segment_dict(exam: Exam) -> dict[str, dict]:
     """
     Construct a dictionary of segment measurements from a carotid exam.
 
-    Pulls raw PSV, EDV, waveform, direction, and optional morphology fields from the
-    database, and returns them in a structured format expected by the calculator.
+    Handles both OneToOne and ForeignKey relations between Segment and Measurement.
 
     Args:
         exam (Exam): A carotid Exam instance containing segment and measurement data.
 
     Returns:
         dict[str, dict]: A mapping of segment name → measurement dictionary.
-                        Each entry includes raw values required by CarotidCalculator.
     """
     segment_data = {}
 
     logger.info(f"Building segment data from Exam ID: {exam.id}")
 
-    for segment in exam.segments.select_related("measurement").all():
+    for segment in exam.segments.all():
         name = segment.name  # e.g., "prox_ica_right"
-        m = segment.measurement
+
+        # Try to retrieve measurement safely
+        m = None
+        if hasattr(segment, "measurement"):
+            # OneToOne relation
+            m = segment.measurement
+        elif hasattr(segment, "measurements"):
+            # ForeignKey relation — use the first measurement if multiple exist
+            related = segment.measurements.all()
+            m = related.first() if hasattr(related, "first") else None
 
         if not m:
             logger.warning(f"No measurement found for segment '{name}' in exam {exam.id}")
@@ -59,14 +66,17 @@ def build_segment_dict(exam: Exam) -> dict[str, dict]:
         logger.debug(f"Processing segment '{name}'")
 
         segment_data[name] = {
-            "psv": m.psv,
-            "edv": m.edv,
-            "direction": m.direction,
-            "waveform": m.waveform,
-            "cca_psv": m.cca_psv,
+            "psv": getattr(m, "psv", None),
+            "edv": getattr(m, "edv", None),
+            "direction": getattr(m, "direction", None),
+            "waveform": getattr(m, "waveform", None),
+            "cca_psv": getattr(m, "cca_psv", None),
             "morphology": getattr(m, "morphology", None),
             "plaque": getattr(m, "plaque_description", None),
         }
 
-    logger.info(f"Segment build complete for Exam ID: {exam.id}. Total segments: {len(segment_data)}")
+    logger.info(
+        f"Segment build complete for Exam ID: {exam.id}. "
+        f"Total segments: {len(segment_data)}"
+    )
     return segment_data

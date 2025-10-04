@@ -89,7 +89,7 @@
   },
   "dropdowns": {
     "stenosisPercent": ["0–19%","20–49%","50–69%","70–99%","Occluded","Not Visualized","Not Evaluated"],
-    "arteryDisease": ["None","Aneurysm","Ectasia","Dissection","FMD","Other","Not Evaluated"]
+    "arteryDisease": ["None","Aneurysm","Ectasia","Dissection","FMD","Other","Not Evaluated"],
     "plaqueMorphology": ["Normal","Homogeneous","Heterogeneous","Calcified"],
     "direction": ["Antegrade","Retrograde","Bidirectional","Not Visualized","Not Evaluated"],
     "waveformShape": ["Triphasic","Biphasic","Monophasic","Absent","Not Visualized","Not Evaluated"],

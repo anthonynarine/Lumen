@@ -1,4 +1,5 @@
 # reports/tests/test_carotid_views.py
+# pytest reports/tests/test_carotid_views.py -v
 
 import pytest
 from rest_framework.test import APIClient
@@ -33,7 +34,7 @@ def test_create_carotid_exam(api_client):
 
     assert response.status_code == 201
     assert Exam.objects.count() == 1
-    return response.data["exam"]["id"]
+    # return response.data["exam"]["id"]
 
 
 @pytest.mark.django_db
